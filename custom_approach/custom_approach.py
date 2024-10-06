@@ -30,6 +30,7 @@ def load_data():
     # Placeholder for loading your dataset
     images = np.random.rand(100, 37,80, 80, 9).astype(np.float32)  # Example with 100 images of 9 bands
     labels = np.random.randint(0, 4, (100, 80, 80))  # For pixel-wise classification
+    print(images.shape, labels.shape)
 
     return images, labels
 
