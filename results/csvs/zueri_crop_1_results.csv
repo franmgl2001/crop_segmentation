@@ -1,0 +1,125 @@
+GT,raw_ENG,Overall Accuracy,MIoU
+1,summer barley,92.13137817382812,0.8255614157600706
+2,Winter barley,0.0,0.0
+3,oats,90.2327880859375,0.7520696178584941
+4,triticale,35.71703338623047,0.3207872928176795
+5,mixed fodder cereals,64.4273910522461,0.4884388695783587
+6,Feed wheat according to the list of varieties swiss granum,0.0,0.0
+7,grain maize,0.0,0.0
+8,"wild emmer, einkorn wheat",26.859058380126957,0.2349963151654971
+9,summer wheat,2.1254537105560303,0.0193305044790193
+10,Winter wheat (without forage wheat of the variety list swiss granum),9.265175819396973,0.0782198246797033
+11,rye,91.8004379272461,0.7582686031643033
+12,mixed cereals for bread production,42.312835693359375,0.3785885167464115
+13,Spelt,,
+14,maize for seed production (by contract),84.53058624267578,0.5430428977767459
+15,Mads d'ensilage et mads vert,,
+16,Sugar beets,84.29899597167969,0.5635522695621653
+17,fodder beet,92.99925994873048,0.8181699431781072
+18,potatoes,0.0,0.0
+19,potatoes for planting (by contract),79.13420104980469,0.5747560116711943
+20,summer rapeseed for oil production,11.764705657958984,0.1158594491927825
+21,Winter rape for cooking oil,0.0,0.0
+22,soy,93.35166931152344,0.8058021920837806
+23,Sunflowers,74.37259674072266,0.6605922551252847
+24,flax,88.26802062988281,0.7541394620005223
+25,hemp,13.41632080078125,0.1015706806282722
+26,Field beans for animal feed,0.0,0.0
+27,protein peas for animal fodder,77.6913070678711,0.6392742796157951
+28,lupine for fodder,80.1741714477539,0.5970746515799641
+29,oil pumpkins,0.0,0.0
+30,tobacco,0.0,0.0
+31,millet,33.975242614746094,0.3351424694708276
+32,Ensiled grain,0.0,0.0
+33,false flax (camelina sativa),0.1468428820371627,0.0014641288433382
+34,"Annual free-range vegetables, without canned vegetables",,
+35,Ground-canned vegetables,65.44066619873047,0.4592279536621259
+36,chicory roots,14.527702331542969,0.139186295503212
+37,buckwheat,0.1533742398023605,0.0015274949083503
+38,sorghum,18.840579986572266,0.097378277153558
+39,"Annual berries (e.g., strawberries)",0.0,0.0
+40,single-year regrowing ressources (Kenaf and others),5.2923078536987305,0.0523432744978697
+41,Annual spice and medicinal plants,,
+42,"Annual horticultural outdoor crops (flowers, turf etc.)",0.0,0.0
+43,Conservation headlands,0.0,0.0
+44,fallow,0.0,0.0
+45,rotational set-aside,35.180908203125,0.3021154693697664
+46,Hem on arable land,25.779037475585938,0.2113003095975232
+47,Poppy,0.0,0.0
+48,safflower,,
+49,lentils,0.0,0.0
+50,"Mixtures of field beans, protein peas and lupines for animal feed with cereals, at least 30% legume content at harvest",0.0,0.0
+51,Bloom strips for pollinators and other beneficials,1.9308125972747805,0.0189423835832675
+52,mustard,0.0,0.0
+53,Winter rape as a renewable raw material,,
+54,Sunflowers as regrowing ressource,0.0,0.0
+55,"open arable land, eligible for subsidies (region-specific biodiversity area)",0.0,0.0
+56,"Other open arable land, eligible",,
+57,"Other open arable land, not eligible",0.0,0.0
+58,Art meadows (without pastures),0.0,0.0
+59,"Other artificial meadow, eligible (eg pork pasture, poultry pasture)",69.9947738647461,0.4726635866361405
+60,Extensively used meadows (without pastures),0.0,0.0
+61,Little intensively used meadows (without pastures),52.99457931518555,0.378249740646325
+62,Other permanent pastures (without pastures),0.0,0.0
+63,"Pastures (pastures, other pastures without summer pastures)",66.79507446289062,0.5163505216607274
+64,Extensively used pastures,30.374536514282227,0.2080472481133566
+65,Forest pastures (without wooded area),0.8451327681541443,0.0083768255778255
+66,"Hay meadows in the summering area, other meadows",0.0,0.0
+67,"Hay meadows in the summering area, type extensively used meadow",0.0,0.0
+68,Forest pastures (without wooded area),0.0,0.0
+69,fodder legumes (Fabaceae) for seed production (by contract),,
+70,fodder grasses for seed production (by contract),0.6849315166473389,0.0068493150684931
+71,Riverside meadows along rivers (without pastures),0.0,0.0
+72,"Other green area (permanent green area), entitled to contributions",0.0,0.0
+73,"Remaining green area (permanent green areas), not eligible",0.0,0.0
+74,vines,0.0,0.0
+75,Fruit plants (apples),55.543113708496094,0.3928854324188089
+76,Fruit plants (pears),59.66352081298828,0.4743882544861337
+77,Fruit plants (Steinobs),14.794921875,0.1425882352941176
+78,Perennial berries,0.0,0.0
+79,Perennial spice and medicinal plants,0.0,0.0
+80,"Perennial renewable resources (miscanthus, etc.)",0.0,0.0
+81,hop,0.0,0.0
+82,rhubarb,0.0,0.0
+83,asparagus,0.0,0.0
+84,Christmas trees,51.25801849365234,0.3796127146510778
+85,Nursery of forest plants outside the forest zone,25.072284698486328,0.2376664056382145
+86,"Ornamental shrubs, ornamental shrubs and ornamental shrubs",0.0,0.0
+87,"Other nurseries (roses, fruits, etc.)",0.0,0.0
+88,Vineyards with natural biodiversity,0.0,0.0
+89,Truffle plants (in production),16.645755767822266,0.1044345316189976
+90,Mulberry trees (feeding silkworms),0.0,0.0
+91,Cultivated selven (chestnut trees),,
+92,Perennial horticultural outdoor crops (not in the greenhouse),,
+93,vines nursery,0.0,0.0
+94,"Other fruit plants (kiwis, elderberries, etc.)",0.0,0.0
+95,vines (region-specific biodiversity area),0.0,0.0
+96,"Other areas with permanent crops, eligible",,
+97,"Other areas with permanent crops, not eligible",0.0,0.0
+98,Vegetable crops in greenhouses with solid foundations,0.0,0.0
+99,Other specialized crops in greenhouses with solid foundations,13.117870330810549,0.1140495867768595
+100,Horticultural crops in greenhouses with solid foundations,0.0,0.0
+101,Vegetable crops in protected cultivation without firm foundations,0.0,0.0
+102,Other special crops in protected cultivation without firm foundations,0.0,0.0
+103,Horticultural crops in protected cultivation without firm foundations,0.0,0.0
+104,Other crops in protected cultivation without a firm foundation,0.0,0.0
+105,other cultures in protected cultivation with solid foundation),0.0,0.0
+106,"Other crops in protected cultivation without firm foundations, not eligible",0.0,0.0
+107,Scattering areas in the LN,0.0,0.0
+108,"Hedge, field and bank shrubs (with herbaceous area)",2.625410318374634,0.0255009107468123
+109,"Hedgerow, field and bank shrubs (with buffer strips)",0.3414717316627502,0.0033540164346805
+110,"Hedgerow, field and bank shrubs (with buffer strips) (region-specific biodiversity production area)",0.0,0.0
+111,"Other areas within the LN, entitled to contribute",0.0,0.0
+112,"Other areas within the LN, not eligible",0.0,0.0
+113,Forest,0.0,0.0
+114,"Other unproductive areas (eg mulched areas, heavily weedy areas, hedges without buffer strips)",0.0,0.0
+115,"Areas without main agricultural purpose (developed building land, playground, riding, camping, golf, air and military spaces",0.0,0.0
+116,"Ditches, ponds, ponds",0.0,0.0
+117,"Ruderal areas, cairns and ramparts",0.0,0.0
+118,dry stone walls,0.0,0.0
+119,"non-asphalted, natural paths",0.0,0.0
+120,Region-specific biodiversity promotion areas,0.0,0.0
+121,home gardens,0.0,0.0
+122,"agricultural production in buildings (e.g. champignons, brussel sprouts)",0.0,0.0
+123,Summer pastures,,
+124,Other areas outside the LN and SF,0.0,0.0
