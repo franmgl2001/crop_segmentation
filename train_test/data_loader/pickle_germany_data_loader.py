@@ -116,7 +116,7 @@ class CutOrPad(object):
         ), "choose either one of random, from start sequence cut methods but not both"
 
     def __call__(self, sample):
-        seq_len = deepcopy(sample["inputs"].shape[0])
+        seq_len = sample["inputs"].shape[0]
         sample["inputs"] = self.pad_or_cut(sample["inputs"])
         if "inputs_backward" in sample:
             sample["inputs_backward"] = self.pad_or_cut(sample["inputs_backward"])
