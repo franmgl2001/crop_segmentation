@@ -97,12 +97,66 @@ class RemapLabel:
         return sample
 
 
+class CutOrPad(object):
+    """
+    Pad series with zeros (matching series elements) to a max sequence length or cut sequential parts
+    items in  : inputs, *inputs_backward, labels
+    items out : inputs, *inputs_backward, labels, seq_lengths
+
+    REMOVE DEEPCOPY OR REPLACE WITH TORCH FUN
+    """
+
+    def __init__(self, max_seq_len, random_sample=False, from_start=False):
+        assert isinstance(max_seq_len, (int, tuple))
+        self.max_seq_len = max_seq_len
+        self.random_sample = random_sample
+        self.from_start = from_start
+        assert (
+            int(random_sample) * int(from_start) == 0
+        ), "choose either one of random, from start sequence cut methods but not both"
+
+    def __call__(self, sample):
+        seq_len = deepcopy(sample["inputs"].shape[0])
+        sample["inputs"] = self.pad_or_cut(sample["inputs"])
+        if "inputs_backward" in sample:
+            sample["inputs_backward"] = self.pad_or_cut(sample["inputs_backward"])
+        if seq_len > self.max_seq_len:
+            seq_len = self.max_seq_len
+        sample["seq_lengths"] = seq_len
+        return sample
+
+    def pad_or_cut(self, tensor, dtype=torch.float32):
+        seq_len = tensor.shape[0]
+        diff = self.max_seq_len - seq_len
+        if diff > 0:
+            tsize = list(tensor.shape)
+            if len(tsize) == 1:
+                # t is series of scalars
+                pad_shape = [diff]
+            else:
+                pad_shape = [diff] + tsize[1:]
+            tensor = torch.cat((tensor, torch.zeros(pad_shape, dtype=dtype)), dim=0)
+        elif diff < 0:
+            if self.random_sample:
+                return tensor[self.random_subseq(seq_len)]
+            elif self.from_start:
+                start_idx = 0
+            else:
+                start_idx = torch.randint(seq_len - self.max_seq_len, (1,))[0]
+            tensor = tensor[start_idx : start_idx + self.max_seq_len]
+        return tensor
+
+    def random_subseq(self, seq_len):
+        return torch.randperm(seq_len)[: self.max_seq_len].sort()[0]
+
+
 # Compose the transformations
 def create_transform(img_res):
     transform_list = [
         Normalize(),
         Rescale(output_size=(img_res, img_res)),
         RemapLabel(remap_label_dict),
+        CutOrPad(max_seq_len=max_seq_len, random_sample=False),  # Add CutOrPad
     ]
     return transform_list
 
@@ -149,6 +203,7 @@ def preprocess_data(pickle_file_path, img_res=24):
     return first_label, combined_bands, days
 
 
+### Data Loader Section ###
 class CustomDataset(Dataset):
     def __init__(self, csv_file, transform=None):
         self.data_paths = pd.read_csv(csv_file)  # Load CSV with file paths
@@ -163,6 +218,8 @@ class CustomDataset(Dataset):
 
         # Load data from the file
         label, bands, days = preprocess_data(f"../../datasets/{data_path}", img_res=24)
+
+        print(label.shape, bands.shape, days.shape)
 
         # Convert to PyTorch tensors
         bands_tensor = torch.tensor(bands, dtype=torch.float32)
