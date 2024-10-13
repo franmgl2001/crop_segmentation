@@ -25,14 +25,17 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=10):
     iteration = 0
     for epoch in range(num_epochs):
         running_loss = 0.0
-        for inputs, labels in train_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
+        for inputs, labels, time_points in train_loader:
+            inputs, labels, time_points = (
+                inputs.to(device),
+                labels.to(device),
+                time_points.to(device),
+            )
             print(iteration)
             iteration += 1
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
-            time_points = torch.linspace(0, 364, steps=142).to(device)
             time_channel = (
                 time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
             )  # BxTxHxW
@@ -100,11 +103,14 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     all_labels = []
 
     with torch.no_grad():
-        for inputs, labels in test_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
+        for inputs, labels, time_points in test_loader:
+            inputs, labels, time_points = (
+                inputs.to(device),
+                labels.to(device),
+                time_points.to(device),
+            )
 
             B, T, H, W, C = inputs.shape
-            time_points = torch.linspace(0, 364, steps=142).to(device)
             time_channel = time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
 
             inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
@@ -171,16 +177,14 @@ def evaluate_model(model, test_loader, criterion, num_classes):
 
 
 # Create Dataset and Split into Train and Test Sets
-train_csv_path = "../../../crop_segmentation/datasets/germany_dataset/data_IJGI18/datasets/full/240pkl/train_paths.csv"
-test_csv_path = "../../../crop_segmentation/datasets/germany_dataset/data_IJGI18/datasets/full/240pkl/eval_paths.csv"
+train_csv_path = "csvs/train_paths.csv"
+test_csv_path = "csvs/eval_paths.csv"
 
 train_dataset = CustomDataset(train_csv_path)
 test_dataset = CustomDataset(test_csv_path)
-dataset = CustomDataset("dataset/")
-train_size = int(0.8 * len(dataset))
-test_size = len(dataset) - train_size
-train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-
+num_classes = 17
+channels = [10]
+max_sequence_length = 36
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=8)
 test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
@@ -207,9 +211,9 @@ config = {
 model = TSViT(
     config,
     img_res=24,
-    num_channels=[9],
-    num_classes=150,
-    max_seq_len=142,
+    num_channels=channels,
+    num_classes=num_classes,
+    max_seq_len=36,
     patch_embedding="Channel Encoding",
 )
 print("Done creating model")
