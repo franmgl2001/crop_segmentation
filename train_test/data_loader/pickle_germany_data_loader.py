@@ -156,7 +156,7 @@ def create_transform(img_res):
         Normalize(),
         Rescale(output_size=(img_res, img_res)),
         RemapLabel(remap_label_dict),
-        CutOrPad(max_seq_len=max_seq_len, random_sample=False),  # Add CutOrPad
+        CutOrPad(max_seq_len=51, random_sample=False),  # Add CutOrPad
     ]
     return transform_list
 
