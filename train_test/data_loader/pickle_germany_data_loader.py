@@ -162,7 +162,7 @@ class CustomDataset(Dataset):
         data_path = self.data_paths.iloc[idx, 0]
 
         # Load data from the file
-        label, bands, days = preprocess_data(f"../../datsets/{data_path}", img_res=24)
+        label, bands, days = preprocess_data(f"../../datasets/{data_path}", img_res=24)
 
         # Convert to PyTorch tensors
         bands_tensor = torch.tensor(bands, dtype=torch.float32)
