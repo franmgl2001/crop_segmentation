@@ -8,9 +8,10 @@ import numpy as np
 import os
 import csv
 
+
 def export_results_to_csv(results, output_csv_path):
     csv_columns = ["Class", "Overall Accuracy", "MIoU"]
-    with open(output_csv_path, mode='w', newline='') as file:
+    with open(output_csv_path, mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=csv_columns)
         writer.writeheader()
         for result in results:
@@ -75,7 +76,7 @@ def compute_iou_per_class(preds, labels, num_classes):
         union = np.logical_or(pred_cls, true_cls).sum()
 
         if union == 0:
-            iou = float('nan')  # Ignore classes with no presence in both true and pred
+            iou = float("nan")  # Ignore classes with no presence in both true and pred
         else:
             iou = intersection / union
 
@@ -153,14 +154,12 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     results = []
     for i in range(num_classes):
         class_iou = ious[i]
-        class_accuracy = class_accuracies[i].item() if total_per_class[i] > 0 else float('nan')
-        results.append({
-            "Class": i +1,
-            "Overall Accuracy": class_accuracy,
-            "MIoU": class_iou
-        })
-
-
+        class_accuracy = (
+            class_accuracies[i].item() if total_per_class[i] > 0 else float("nan")
+        )
+        results.append(
+            {"Class": i + 1, "Overall Accuracy": class_accuracy, "MIoU": class_iou}
+        )
 
     # Print per-class IoU and accuracy
     for i in range(num_classes):
@@ -169,7 +168,6 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     export_results_to_csv(results, "Prueba.csv")
 
     model.train()  # Switch back to training mode
-
 
 
 # Create Dataset and Split into Train and Test Sets
@@ -227,5 +225,3 @@ evaluate_model(model, test_loader, criterion, 150)
 
 # Save the Model
 torch.save(model.state_dict(), "tsvit_model.pth")
-
-

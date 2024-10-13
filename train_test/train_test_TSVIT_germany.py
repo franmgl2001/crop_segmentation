@@ -2,22 +2,21 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset, random_split
-from train_test.models.TSViT import TSViT
+from models.TSViT import TSViT
 import numpy as np
 import os
 import csv
-from data_loader.numpy_dataloader_zuericop import CustomDataset
+from data_loader.pickle_germany_data_loader import CustomDataset
+
 
 def export_results_to_csv(results, output_csv_path):
     csv_columns = ["Class", "Overall Accuracy", "MIoU"]
-    with open(output_csv_path, mode='w', newline='') as file:
+    with open(output_csv_path, mode="w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=csv_columns)
         writer.writeheader()
         for result in results:
             writer.writerow(result)
     print(f"Results saved to {output_csv_path}")
-
-
 
 
 # Simplified Training Loop
@@ -77,7 +76,7 @@ def compute_iou_per_class(preds, labels, num_classes):
         union = np.logical_or(pred_cls, true_cls).sum()
 
         if union == 0:
-            iou = float('nan')  # Ignore classes with no presence in both true and pred
+            iou = float("nan")  # Ignore classes with no presence in both true and pred
         else:
             iou = intersection / union
 
@@ -155,14 +154,12 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     results = []
     for i in range(num_classes):
         class_iou = ious[i]
-        class_accuracy = class_accuracies[i].item() if total_per_class[i] > 0 else float('nan')
-        results.append({
-            "Class": i +1,
-            "Overall Accuracy": class_accuracy,
-            "MIoU": class_iou
-        })
-
-
+        class_accuracy = (
+            class_accuracies[i].item() if total_per_class[i] > 0 else float("nan")
+        )
+        results.append(
+            {"Class": i + 1, "Overall Accuracy": class_accuracy, "MIoU": class_iou}
+        )
 
     # Print per-class IoU and accuracy
     for i in range(num_classes):
@@ -173,8 +170,12 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     model.train()  # Switch back to training mode
 
 
-
 # Create Dataset and Split into Train and Test Sets
+train_csv_path = "../../../crop_segmentation/datasets/germany_dataset/data_IJGI18/datasets/full/240pkl/train_paths.csv"
+test_csv_path = "../../../crop_segmentation/datasets/germany_dataset/data_IJGI18/datasets/full/240pkl/eval_paths.csv"
+
+train_dataset = CustomDataset(train_csv_path)
+test_dataset = CustomDataset(test_csv_path)
 dataset = CustomDataset("dataset/")
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
@@ -229,5 +230,3 @@ evaluate_model(model, test_loader, criterion, 150)
 
 # Save the Model
 torch.save(model.state_dict(), "tsvit_model.pth")
-
-
