@@ -172,7 +172,8 @@ def evaluate_model(model, test_loader, criterion, num_classes):
 
 
 # Create Dataset and Split into Train and Test Sets
-dataset = CustomDataset("dataset/")
+dataset = CustomDataset("../../datasets/zuericrop/dataset")
+num_classes = 13
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
@@ -204,7 +205,7 @@ model = TSViT(
     config,
     img_res=24,
     num_channels=[9],
-    num_classes=150,
+    num_classes=num_classes,
     max_seq_len=142,
     patch_embedding="Channel Encoding",
 )
@@ -222,7 +223,7 @@ model.to(device)
 train_model(model, train_loader, criterion, optimizer)
 
 # Evaluate the Model on Test Set
-evaluate_model(model, test_loader, criterion, 150)
+evaluate_model(model, test_loader, criterion, num_classes)
 
 # Save the Model
 torch.save(model.state_dict(), "tsvit_model.pth")
