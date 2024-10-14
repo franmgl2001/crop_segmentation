@@ -30,6 +30,10 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=10):
             unique_labels = torch.unique(labels)
             print(f"Unique labels in this batch: {unique_labels}")
 
+            mask = labels != 0
+            if not torch.any(mask):  # If all labels are zero, skip this batch
+                continue
+
             print(iteration)
             iteration += 1
 
