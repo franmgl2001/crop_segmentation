@@ -176,7 +176,7 @@ def evaluate_model(model, test_loader, criterion, num_classes):
 
 # Create Dataset and Split into Train and Test Sets
 dataset = CustomDataset("../../datasets/zuericrop/dataset")
-num_classes = 13
+num_classes = 14
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
