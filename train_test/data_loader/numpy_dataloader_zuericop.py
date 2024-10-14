@@ -13,7 +13,7 @@ class CustomDataset(Dataset):
             os.path.join(self.dataset_dir, d)
             for d in os.listdir(self.dataset_dir)
             if os.path.isdir(os.path.join(self.dataset_dir, d))
-        ]
+        ][:100]
 
     def __len__(self):
         return len(self.data_paths)

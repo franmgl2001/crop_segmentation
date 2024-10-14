@@ -89,7 +89,12 @@ def compute_iou_per_class(preds, labels, num_classes):
 
 
 # Evaluation Loop with MIoU and mean accuracy calculation
-def evaluate_model(model, test_loader, criterion, num_classes):
+import csv
+
+
+def evaluate_model(
+    model, test_loader, criterion, num_classes, csv_filename="predictions_log.csv"
+):
     model.eval()
     total_loss = 0.0
     correct = 0
@@ -103,38 +108,51 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     all_preds = []
     all_labels = []
 
-    with torch.no_grad():
-        for inputs, labels in test_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
+    # Open CSV file to log predictions and labels
+    with open(csv_filename, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Index", "True Label", "Predicted Label"])  # CSV headers
 
-            B, T, H, W, C = inputs.shape
-            time_points = torch.linspace(0, 364, steps=142).to(device)
-            time_channel = time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
+        with torch.no_grad():
+            for idx, (inputs, labels) in enumerate(test_loader):
+                inputs, labels = inputs.to(device), labels.to(device)
 
-            inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
-            inputs = inputs.permute(0, 1, 4, 2, 3)
-
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            total_loss += loss.item()
-
-            # Get predicted classes
-            _, predicted = torch.max(outputs, 1)
-
-            # Store predictions and labels for MIoU and mean accuracy
-            all_preds.append(predicted.cpu().numpy())
-            all_labels.append(labels.cpu().numpy())
-
-            # Update global accuracy
-            correct += (predicted == labels).sum().item()
-            total += labels.numel()
-
-            # Update per-class accuracy
-            for label in range(num_classes):
-                correct_per_class[label] += (
-                    ((predicted == labels) & (labels == label)).sum().item()
+                B, T, H, W, C = inputs.shape
+                time_points = torch.linspace(0, 364, steps=142).to(device)
+                time_channel = (
+                    time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
                 )
-                total_per_class[label] += (labels == label).sum().item()
+
+                inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
+                inputs = inputs.permute(0, 1, 4, 2, 3)
+
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
+
+                # Get predicted classes
+                _, predicted = torch.max(outputs, 1)
+
+                # Store predictions and labels for MIoU and mean accuracy
+                all_preds.append(predicted.cpu().numpy())
+                all_labels.append(labels.cpu().numpy())
+
+                # Write each prediction and label to the CSV
+                for i in range(labels.size(0)):  # Iterate through batch size
+                    writer.writerow(
+                        [idx * B + i, labels[i].item(), predicted[i].item()]
+                    )
+
+                # Update global accuracy
+                correct += (predicted == labels).sum().item()
+                total += labels.numel()
+
+                # Update per-class accuracy
+                for label in range(num_classes):
+                    correct_per_class[label] += (
+                        ((predicted == labels) & (labels == label)).sum().item()
+                    )
+                    total_per_class[label] += (labels == label).sum().item()
 
     # Convert all predictions and labels to numpy arrays for MIoU and mean accuracy calculation
     all_preds = np.concatenate(all_preds, axis=0)
@@ -154,7 +172,7 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     overall_accuracy = 100 * correct / total
     print(f"Test Loss: {avg_loss:.4f}, Overall Accuracy: {overall_accuracy:.2f}%")
 
-    # Prepare data for CSV export
+    # Prepare data for CSV export of accuracy and IoU results
     results = []
     for i in range(num_classes):
         class_iou = ious[i]
@@ -169,7 +187,7 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     for i in range(num_classes):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
-    export_results_to_csv(results, "Prueba.csv")
+    export_results_to_csv(results, "Test_not_all_classes.csv")
 
     model.train()  # Switch back to training mode
 
