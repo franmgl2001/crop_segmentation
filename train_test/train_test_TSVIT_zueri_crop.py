@@ -29,6 +29,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=10):
             inputs, labels = inputs.to(device), labels.to(device)
             print(iteration)
             iteration += 1
+            inputs = inputs * 0.0001  # Rescaling here
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
