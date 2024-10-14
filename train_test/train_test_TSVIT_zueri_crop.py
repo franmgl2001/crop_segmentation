@@ -202,6 +202,7 @@ num_classes = 14
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=8)
@@ -236,12 +237,34 @@ model = TSViT(
 )
 print("Done creating model")
 
+
+class_weights_tensor = torch.FloatTensor(
+    [
+        0.68259812,  # Weight for class 1
+        0.32247087,  # Weight for class 2
+        0.74346263,  # Weight for class 3
+        1.19371417,  # Weight for class 4
+        1.44125069,  # Weight for class 5
+        0.92356432,  # Weight for class 6
+        1.32345789,  # Weight for class 7
+        1.03959755,  # Weight for class 8
+        1.39183377,  # Weight for class 9
+        1.28410447,  # Weight for class 10
+        0.97988545,  # Weight for class 11
+        1.00320957,  # Weight for class 12
+        0.67085051,  # Weight for class 13
+    ]
+).to(device)
+
+
 # Loss Function and Optimizer
-criterion = nn.CrossEntropyLoss(ignore_index=0)  # Ignore the background class
+criterion = nn.CrossEntropyLoss(
+    weight=class_weights_tensor, ignore_index=0
+)  # Ignore the background class
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 model.to(device)
 
 # Train the Model
