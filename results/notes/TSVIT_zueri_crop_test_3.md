@@ -17,6 +17,8 @@
 
 - **Steps**: 
   - Class relabel to the 4th_tier_ENG, to have less classes and more generalization.
+  - Remove all classes that have less than 50,000 pixels.
+  - Normalize band values by multiplying by 0.0001
 - **Tools Used**: Python script
 - **Remarks**: Raw dataset
 
