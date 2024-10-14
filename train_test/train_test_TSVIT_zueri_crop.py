@@ -103,6 +103,8 @@ def evaluate_model(model, test_loader, criterion, num_classes):
     with torch.no_grad():
         for inputs, labels in test_loader:
             inputs, labels = inputs.to(device), labels.to(device)
+            unique_labels = torch.unique(labels)
+            print(f"Unique labels in this batch: {unique_labels}")
 
             B, T, H, W, C = inputs.shape
             time_points = torch.linspace(0, 364, steps=142).to(device)
