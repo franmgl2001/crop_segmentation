@@ -16,7 +16,7 @@
 ## 2. Preprocessing
 
 - **Steps**: 
-  - None
+  - Class relabel to the 4th_tier_ENG, to have less classes and more generalization.
 - **Tools Used**: Python script
 - **Remarks**: Raw dataset
 
@@ -62,22 +62,21 @@
 
 ## 5. Results
 
-- **Accuracy**:  77.79%
-- **Precision**: Nan
-- **Recall**: Nan
-- **F1 Score**: Nan
+- **Accuracy**:   79.1 %
+- **MIOU**: 50.26 %
+- **F1 Score**: 50.88%
 - **Training Time**: 7 hours
-- **Crop Results**: [Results](../csvs/zueri_crop_1_results.csv)
+- **Crop Results**: [Results](../csvs/zueri_crop_2_results.csv)
+- **Test Loss**: 0.6512
+- **Confusion Matrix**: ![Confusion Martix](../images/cofusion_matrix_zuericrop%203.png)
 
 
 ---
 
 ## 6. Observations
 
-- **Strengths** Easy to run, although it 
-- **Weaknesses**: It has really bad presicion with some crops and it seems overfitted, more if you consider the MIoU model. Probably one of the reasons is because of the classes that were not preprocessed so some extra classes showed up.
-- **Further Improvements**: I think this model could work better if it was runned by relabeled classes. that go from 1 to 48.
-
-
+- **Strengths** Easy to run and relabel. It looks like it has not bad accuracies for classes with lots of pixels.
+- **Weaknesses**: I removed some classes that had few pixels.
+- **Further Improvements**: I think this model could work better if we had a more balanced dataset. Probably some techniques for this should work. 
 ---
 
