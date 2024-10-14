@@ -88,10 +88,6 @@ def compute_iou_per_class(preds, labels, num_classes):
     return np.array(ious)
 
 
-# Evaluation Loop with MIoU and mean accuracy calculation
-import csv
-
-
 def evaluate_model(
     model, test_loader, criterion, num_classes, csv_filename="predictions_log.csv"
 ):
@@ -137,11 +133,16 @@ def evaluate_model(
                 all_preds.append(predicted.cpu().numpy())
                 all_labels.append(labels.cpu().numpy())
 
-                # Write each prediction and label to the CSV
+                # Flatten the labels and predictions before logging them
                 for i in range(labels.size(0)):  # Iterate through batch size
-                    writer.writerow(
-                        [idx * B + i, labels[i].item(), predicted[i].item()]
-                    )
+                    flattened_labels = labels[i].flatten().cpu().numpy()
+                    flattened_predictions = predicted[i].flatten().cpu().numpy()
+
+                    # Log all pixels for this image
+                    for j in range(len(flattened_labels)):
+                        writer.writerow(
+                            [idx * B + i, flattened_labels[j], flattened_predictions[j]]
+                        )
 
                 # Update global accuracy
                 correct += (predicted == labels).sum().item()
@@ -187,7 +188,7 @@ def evaluate_model(
     for i in range(num_classes):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
-    export_results_to_csv(results, "Test_not_all_classes.csv")
+    export_results_to_csv(results, "Prueba.csv")
 
     model.train()  # Switch back to training mode
 
