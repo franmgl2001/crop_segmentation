@@ -240,6 +240,7 @@ print("Done creating model")
 
 class_weights_tensor = torch.FloatTensor(
     [
+        0.0,  # Weight for class 0 (background)
         0.68259812,  # Weight for class 1
         0.32247087,  # Weight for class 2
         0.74346263,  # Weight for class 3
