@@ -219,7 +219,7 @@ model = TSViT(
 print("Done creating model")
 
 # Loss Function and Optimizer
-criterion = nn.CrossEntropyLoss(ignore_index=0)
+criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Set device

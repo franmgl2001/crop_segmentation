@@ -33,4 +33,6 @@ class CustomDataset(Dataset):
         image_tensor = torch.tensor(image, dtype=torch.float32)
         label_tensor = torch.tensor(label, dtype=torch.long)
 
+        image_tensor = image_tensor * 0.0001  # Rescaling here
+
         return image_tensor, label_tensor
