@@ -186,17 +186,21 @@ def evaluate_model(
     for i in range(num_classes):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
-    export_results_to_csv(results, "Prueba.csv")
+    export_results_to_csv(results, "results_5.csv")
 
     model.train()  # Switch back to training mode
 
 
 # Create Dataset and Split into Train and Test Sets
-dataset = CustomDataset("../../datasets/zuericrop/dataset")
-num_classes = 14
-train_size = int(0.8 * len(dataset))
-test_size = len(dataset) - train_size
-train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+train_dataset = CustomDataset(
+    "csvs/train_zuericrop_5.txt", "../../datasets/zuericrop/dataset"
+)
+test_dataset = CustomDataset(
+    "csvs/test_zuericrop_5.txt", "../../datasets/zuericrop/dataset"
+)
+
+num_classes = 5
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
