@@ -20,7 +20,7 @@ def export_results_to_csv(results, output_csv_path):
 
 
 # Simplified Training Loop
-def train_model(model, train_loader, criterion, optimizer, num_epochs=10):
+def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
     model.train()
     iteration = 0
     for epoch in range(num_epochs):
@@ -30,11 +30,6 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=10):
             unique_labels = torch.unique(labels)
             print(f"Unique labels in this batch: {unique_labels}")
 
-            mask = labels != 0
-            if not torch.any(mask):  # If all labels are zero, skip this batch
-                continue
-
-            print(iteration)
             iteration += 1
 
             B, T, H, W, C = inputs.shape
@@ -238,13 +233,8 @@ model = TSViT(
 print("Done creating model")
 
 
-class_weights_tensor = torch.FloatTensor().to(device)
-
-
 # Loss Function and Optimizer
-criterion = nn.CrossEntropyLoss(
-    weight=class_weights_tensor, ignore_index=0
-)  # Ignore the background class
+criterion = nn.CrossEntropyLoss()  # Ignore the background class
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Set device
