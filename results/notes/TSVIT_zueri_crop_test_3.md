@@ -18,7 +18,7 @@
 - **Steps**: 
   - Class relabel to the 4th_tier_ENG, to have less classes and more generalization.
   - Remove all classes that have less than 50,000 pixels.
-  - Normalize band values by multiplying by 0.0001
+  - Normalize band values by multiplying by 0.0001.
 - **Tools Used**: Python script
 - **Remarks**: Raw dataset
 
@@ -68,7 +68,7 @@
 - **MIOU**: 50.26 %
 - **F1 Score**: 50.88%
 - **Training Time**: 7 hours
-- **Crop Results**: [Results](../csvs/zueri_crop_2_results.csv)
+- **Crop Results**: [Results](../csvs/zueri_crop_3_results.csv)
 - **Test Loss**: 0.6512
 - **Confusion Matrix**: ![Confusion Martix](../images/cofusion_matrix_zuericrop%203.png)
 
