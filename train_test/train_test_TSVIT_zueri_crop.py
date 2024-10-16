@@ -238,24 +238,7 @@ model = TSViT(
 print("Done creating model")
 
 
-class_weights_tensor = torch.FloatTensor(
-    [
-        0.0,  # Weight for class 0 (background)
-        0.68259812,  # Weight for class 1
-        0.32247087,  # Weight for class 2
-        0.74346263,  # Weight for class 3
-        1.19371417,  # Weight for class 4
-        1.44125069,  # Weight for class 5
-        0.92356432,  # Weight for class 6
-        1.32345789,  # Weight for class 7
-        1.03959755,  # Weight for class 8
-        1.39183377,  # Weight for class 9
-        1.28410447,  # Weight for class 10
-        0.97988545,  # Weight for class 11
-        1.00320957,  # Weight for class 12
-        0.67085051,  # Weight for class 13
-    ]
-).to(device)
+class_weights_tensor = torch.FloatTensor().to(device)
 
 
 # Loss Function and Optimizer
