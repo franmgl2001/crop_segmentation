@@ -27,6 +27,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
         running_loss = 0.0
         for inputs, labels, time_points in train_loader:
             labels  = labels.squeeze(-1)
+            inputs = inputs.permute(0, 1, 3, 4, 2)  # New shape: [8, 37, 128, 128, 10]
             inputs, labels = inputs.to(device), labels.to(device)
             print(f"Labels shape: {labels.shape}")
             print(f"inputs shape: {inputs.shape}")
