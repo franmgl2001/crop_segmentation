@@ -25,7 +25,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
     iteration = 0
     for epoch in range(num_epochs):
         running_loss = 0.0
-        for inputs, labels in train_loader:
+        for inputs, labels, time_points in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             unique_labels = torch.unique(labels)
             print(f"Unique labels in this batch: {unique_labels}")
@@ -34,7 +34,6 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
-            time_points = torch.linspace(0, 364, steps=142).to(device)
             time_channel = (
                 time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
             )  # BxTxHxW
@@ -108,8 +107,8 @@ def evaluate_model(
         writer.writerow(["Index", "True Label", "Predicted Label"])  # CSV headers
 
         with torch.no_grad():
-            for idx, (inputs, labels) in enumerate(test_loader):
-                inputs, labels = inputs.to(device), labels.to(device)
+            for idx, (inputs, labels, time_points) in enumerate(test_loader):
+                inputs, labels, time_points = inputs.to(device), labels.to(device), time_points.to(device)
 
                 B, T, H, W, C = inputs.shape
                 time_points = torch.linspace(0, 364, steps=142).to(device)
