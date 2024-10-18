@@ -2,13 +2,13 @@ import torch
 import numpy as np
 import json
 
-from data_loader.pastis.dates_management import (
+from dates_management import (
     get_features_by_id,
     number_dates_by_difference,
 )
 
 
-with open("data_loader/pastis/metadata.geojson") as f:
+with open("metadata.geojson") as f:
 
     metadata = json.load(f)
 
@@ -124,7 +124,9 @@ class SimpleTransform:
     def __init__(self, seq_len):
         self.to_tensor = ToTensor()
         self.normalize = Normalize()
-        self.crop = Crop()
+        self.crop = Crop(
+            img_size=128, crop_size=24, random=True, ground_truths=["labels"]
+        )
         self.cut = Cut(seq_len)
 
     def __call__(self, sample):
@@ -135,36 +137,37 @@ class SimpleTransform:
         return cut_sample
 
 
-class Crop:
-    """Crop 128x128 images into 4 non-overlapping 32x32 patches."""
+class Crop(object):
+    """Crop randomly the image in a sample.
+
+    Args:
+        output_size (tuple or int): Desired output size. If int, square crop
+            is made.
+    """
+
+    def __init__(self, img_size, crop_size, random=False, ground_truths=[]):
+        self.img_size = img_size
+        self.crop_size = crop_size
+        self.random = random
+        if not random:
+            self.top = int((img_size - crop_size) / 2)
+            self.left = int((img_size - crop_size) / 2)
+        self.ground_truths = ground_truths
 
     def __call__(self, sample):
-        inputs = sample["inputs"]  # Shape: (B, T, C, 128, 128)
-        labels = sample["labels"]  # Shape: (B, 128, 128)
-
-        # Crop inputs and labels into 4 patches each
-        input_patches = torch.cat(
-            [
-                inputs[:, :, :, 0:32, 0:32],  # Top-left
-                inputs[:, :, :, 0:32, 32:64],  # Top-right
-                inputs[:, :, :, 32:64, 0:32],  # Bottom-left
-                inputs[:, :, :, 32:64, 32:64],  # Bottom-right
-            ],
-            dim=0,
-        )  # Concatenate along batch dimension
-
-        label_patches = torch.cat(
-            [
-                labels[:, 0:32, 0:32],  # Top-left
-                labels[:, 0:32, 32:64],  # Top-right
-                labels[:, 32:64, 0:32],  # Bottom-left
-                labels[:, 32:64, 32:64],  # Bottom-right
-            ],
-            dim=0,
-        )  # Concatenate along batch dimension
-
-        sample["inputs"] = input_patches
-        sample["labels"] = label_patches
+        if self.random:
+            top = torch.randint(self.img_size - self.crop_size, (1,))[0]
+            left = torch.randint(self.img_size - self.crop_size, (1,))[0]
+        else:  # center
+            top = self.top
+            left = self.left
+        sample["inputs"] = sample["inputs"][
+            :, :, top : top + self.crop_size, left : left + self.crop_size
+        ]
+        for gt in self.ground_truths:
+            sample[gt] = sample[gt][
+                top : top + self.crop_size, left : left + self.crop_size
+            ]
         return sample
 
 
@@ -183,8 +186,8 @@ def process_image(image_id, seq_len=37, root_path="."):
     transform = SimpleTransform(seq_len=seq_len)
 
     # Load inputs and labels
-    inputs = np.load(f"{root_path}/DATA_S2/S2_{image_id}.npy")
-    labels = np.load(f"{root_path}/ANNOTATIONS/TARGET_{image_id}.npy")[:1]
+    inputs = np.load(f"{root_path}/S2_{image_id}.npy")
+    labels = np.load(f"{root_path}/TARGET_{image_id}.npy")[:1]
 
     # Get the feature with the given ID
     feature = get_features_by_id(metadata, image_id)
