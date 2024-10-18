@@ -149,7 +149,6 @@ def process_image(image_id, seq_len=37, root_path="."):
     return transformed_sample["inputs"],  transformed_sample["labels"], transformed_sample["doy"]
 
 
-print(process_image("10493", 37))
 
 
 
