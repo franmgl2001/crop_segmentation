@@ -211,8 +211,8 @@ num_classes = 19
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=8)
-test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=8)
+test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
 
 # Model Configuration
 patch_size = 2
@@ -235,7 +235,7 @@ config = {
 # Initialize the TSViT Model
 model = TSViT(
     config,
-    img_res=32,
+    img_res=24,
     num_channels=[10],
     num_classes=num_classes,
     max_seq_len=37,
