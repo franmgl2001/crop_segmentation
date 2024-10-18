@@ -16,7 +16,10 @@ class CropDataset(Dataset):
 
     def __getitem__(self, idx):
         image_id = self.image_ids[idx]
-        return process_image(image_id, self.seq_len, "../../../../datasets/PASTIS/PASTIS-R")
+        inputs, labels, doy = process_image(image_id, self.seq_len, "../../../../datasets/PASTIS/PASTIS-R")
+        print(inputs.shape)
+        print(labels.shape)
+        return inputs, labels  # Ensure you're returning a valid tuple
 
 def load_dataset(json_path, batch_size=8, shuffle=True, seq_len=37):
     with open(json_path, 'r') as f:
@@ -32,4 +35,5 @@ def load_dataset(json_path, batch_size=8, shuffle=True, seq_len=37):
 
 # Example usage
 # metadata = load_your_metadata_function()  # Load your metadata here
-#train_loader, test_loader = load_dataset('train_test_split.json')
+#
+# train_loader, test_loader = load_dataset('train_test_split.json')
