@@ -5,9 +5,8 @@ from cheap_transforms_pastis import process_image
 
 
 class CropDataset(Dataset):
-    def __init__(self, image_ids, metadata, seq_len=37):
+    def __init__(self, image_ids, seq_len=37):
         self.image_ids = image_ids
-        self.metadata = metadata
         self.seq_len = seq_len
 
 
@@ -18,12 +17,12 @@ class CropDataset(Dataset):
         image_id = self.image_ids[idx]
         return process_image(image_id, self.seq_len, "../../datasets/PASTIS/PASTIS-R/")
 
-def load_dataset(json_path, metadata, batch_size=32, shuffle=True, seq_len=37):
+def load_dataset(json_path, batch_size=32, shuffle=True, seq_len=37):
     with open(json_path, 'r') as f:
         data_split = json.load(f)
     
-    train_dataset = CropDataset(data_split["train"], metadata, seq_len=seq_len)
-    test_dataset = CropDataset(data_split["test"], metadata, seq_len=seq_len)
+    train_dataset = CropDataset(data_split["train"], seq_len=seq_len)
+    test_dataset = CropDataset(data_split["test"],  seq_len=seq_len)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -32,4 +31,19 @@ def load_dataset(json_path, metadata, batch_size=32, shuffle=True, seq_len=37):
 
 # Example usage
 # metadata = load_your_metadata_function()  # Load your metadata here
-train_loader, test_loader = load_dataset('train_test_split.json', metadata={})
+train_loader, test_loader = load_dataset('train_test_split.json')
+
+# Test the DataLoader
+def test_dataloader(loader, dataset_type):
+    print(f"\nTesting {dataset_type} DataLoader...")
+    for batch_idx, (inputs, labels, doy) in enumerate(loader):
+        print(f"Batch {batch_idx}:")
+        print(f" - Inputs shape: {inputs.shape}")
+        print(f" - Labels shape: {labels.shape}")
+        print(f" - DOY shape: {doy.shape}")
+        # Stop after first batch for testing
+        if batch_idx == 0:
+            break
+
+# Test train and test loaders
+test_dataloader(train_loader, "Train")
