@@ -91,7 +91,11 @@ def compute_iou_per_class(preds, labels, num_classes):
 
 
 def evaluate_model(
-    model, test_loader, criterion, num_classes, csv_filename="predictions_log.csv"
+    model,
+    test_loader,
+    criterion,
+    num_classes,
+    csv_filename="predictions_log_PASTIS.csv",
 ):
     model.eval()
     total_loss = 0.0
@@ -122,7 +126,7 @@ def evaluate_model(
                 inputs = inputs.permute(
                     0, 1, 3, 4, 2
                 )  # New shape: [8, 37, 128, 128, 10]
-                labels = labels.squeeze(-1)
+                labels = labels.squeeze(-1).long()
 
                 B, T, H, W, C = inputs.shape
                 time_points = torch.linspace(0, 364, steps=37).to(device)
@@ -199,7 +203,7 @@ def evaluate_model(
     for i in range(num_classes):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
-    export_results_to_csv(results, "results_5.csv")
+    export_results_to_csv(results, "results_Pastis_1.csv")
 
     model.train()  # Switch back to training mode
 
