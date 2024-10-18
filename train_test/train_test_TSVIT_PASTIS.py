@@ -26,18 +26,16 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
     for epoch in range(num_epochs):
         running_loss = 0.0
         for inputs, labels, time_points in train_loader:
-
-            labels = labels.squeeze(-1)
-            # Print the sizes 
-            print(f"Inputs size: {inputs.size()}, Labels size: {labels.size()}, Time points size: {time_points.size()}")
             inputs, labels = inputs.to(device), labels.to(device)
             unique_labels = torch.unique(labels)
             print(f"Unique labels in this batch: {unique_labels}")
 
+            labels  = labels.squeeze(-1)
             iteration += 1
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
+            time_points = torch.linspace(0, 364, steps=142).to(device)
             time_channel = (
                 time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
             )  # BxTxHxW
