@@ -116,8 +116,12 @@ def evaluate_model(
             for idx, (inputs, labels, time_points) in enumerate(test_loader):
                 inputs, labels, time_points = inputs.to(device), labels.to(device), time_points.to(device)
 
+                inputs = inputs.permute(0, 1, 3, 4, 2)  # New shape: [8, 37, 128, 128, 10]
+                labels  = labels.squeeze(-1)
+                
+                
                 B, T, H, W, C = inputs.shape
-                time_points = torch.linspace(0, 364, steps=142).to(device)
+                time_points = torch.linspace(0, 364, steps=37).to(device)
                 time_channel = (
                     time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
                 )
@@ -203,8 +207,8 @@ num_classes = 19
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=8)
-test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=8)
+test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
 
 # Model Configuration
 patch_size = 2
