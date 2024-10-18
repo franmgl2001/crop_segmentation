@@ -31,19 +31,4 @@ def load_dataset(json_path, batch_size=8, shuffle=True, seq_len=37):
 
 # Example usage
 # metadata = load_your_metadata_function()  # Load your metadata here
-train_loader, test_loader = load_dataset('train_test_split.json')
-
-# Test the DataLoader
-def test_dataloader(loader, dataset_type):
-    print(f"\nTesting {dataset_type} DataLoader...")
-    for batch_idx, (inputs, labels, doy) in enumerate(loader):
-        print(f"Batch {batch_idx}:")
-        print(f" - Inputs shape: {inputs.shape}")
-        print(f" - Labels shape: {labels.shape}")
-        print(f" - DOY shape: {doy.shape}")
-        # Stop after first batch for testing
-        if batch_idx == 0:
-            break
-
-# Test train and test loaders
-test_dataloader(train_loader, "Train")
+#train_loader, test_loader = load_dataset('train_test_split.json')
