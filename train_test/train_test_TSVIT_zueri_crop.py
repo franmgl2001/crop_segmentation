@@ -111,6 +111,8 @@ def evaluate_model(
             for idx, (inputs, labels) in enumerate(test_loader):
                 inputs, labels = inputs.to(device), labels.to(device)
 
+                print(inputs.shape, labels.shape)
+
                 B, T, H, W, C = inputs.shape
                 time_points = torch.linspace(0, 364, steps=142).to(device)
                 time_channel = (
