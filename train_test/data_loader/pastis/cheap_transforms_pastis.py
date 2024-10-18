@@ -124,7 +124,9 @@ class SimpleTransform:
     def __init__(self, seq_len):
         self.to_tensor = ToTensor()
         self.normalize = Normalize()
-        self.crop = Crop()
+        self.crop = Crop(
+            img_size=128, crop_size=24, random=True, ground_truths=["labels"]
+        )
         self.cut = Cut(seq_len)
 
     def __call__(self, sample):
