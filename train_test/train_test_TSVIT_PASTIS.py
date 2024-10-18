@@ -35,7 +35,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
-            time_points = torch.linspace(0, 364, steps=142).to(device)
+            time_points = torch.linspace(0, 364, steps=37).to(device)
             time_channel = (
                 time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
             )  # BxTxHxW
