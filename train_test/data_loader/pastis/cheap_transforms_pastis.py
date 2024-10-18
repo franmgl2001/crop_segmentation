@@ -6,7 +6,7 @@ import json
 from data_loader.pastis.dates_management import get_features_by_id, number_dates_by_difference
 
 
-with open("metadata.geojson") as f:
+with open("dataloader/pastis/metadata.geojson") as f:
     metadata = json.load(f)
 
 class ToTensor(object):
