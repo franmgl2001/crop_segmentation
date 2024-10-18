@@ -17,7 +17,7 @@ class CropDataset(Dataset):
     def __getitem__(self, idx):
         print("GET ITEM")
         image_id = self.image_ids[idx]
-        return process_image(image_id, self.seq_len, "../../../../datasets/PASTIS/PASTIS-R")
+        return process_image(image_id, self.seq_len, "../../datasets/PASTIS/PASTIS-R")
 
 
 def load_dataset(json_path, batch_size=8, shuffle=True, seq_len=37):
