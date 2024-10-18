@@ -211,8 +211,8 @@ num_classes = 20
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=8)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=8)
+test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 # Model Configuration
 patch_size = 2
