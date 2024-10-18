@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from cheap_transforms_pastis import process_image
+from dataloader.pastis.cheap_transforms_pastis import process_image
 
 
 class CropDataset(Dataset):
