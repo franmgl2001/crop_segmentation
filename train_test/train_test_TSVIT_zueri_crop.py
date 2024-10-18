@@ -29,6 +29,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
             inputs, labels = inputs.to(device), labels.to(device)
             unique_labels = torch.unique(labels)
             print(f"Unique labels in this batch: {unique_labels}")
+            print(inputs.shape, labels.shape)
 
             iteration += 1
 
