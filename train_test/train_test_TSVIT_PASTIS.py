@@ -26,7 +26,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
     for epoch in range(num_epochs):
         running_loss = 0.0
         for inputs, labels, time_points in train_loader:
-            labels  = labels.squeeze(-1)
+            labels = labels.squeeze(-1)
             inputs = inputs.permute(0, 1, 3, 4, 2)  # New shape: [8, 37, 128, 128, 10]
             inputs, labels = inputs.to(device), labels.to(device)
             print(f"Labels shape: {labels.shape}")
@@ -34,7 +34,6 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
             unique_labels = torch.unique(labels)
             print(f"Unique labels in this batch: {unique_labels}")
 
-            
             iteration += 1
 
             B, T, H, W, C = inputs.shape
@@ -114,12 +113,17 @@ def evaluate_model(
 
         with torch.no_grad():
             for idx, (inputs, labels, time_points) in enumerate(test_loader):
-                inputs, labels, time_points = inputs.to(device), labels.to(device), time_points.to(device)
+                inputs, labels, time_points = (
+                    inputs.to(device),
+                    labels.to(device),
+                    time_points.to(device),
+                )
 
-                inputs = inputs.permute(0, 1, 3, 4, 2)  # New shape: [8, 37, 128, 128, 10]
-                labels  = labels.squeeze(-1)
-                
-                
+                inputs = inputs.permute(
+                    0, 1, 3, 4, 2
+                )  # New shape: [8, 37, 128, 128, 10]
+                labels = labels.squeeze(-1)
+
                 B, T, H, W, C = inputs.shape
                 time_points = torch.linspace(0, 364, steps=37).to(device)
                 time_channel = (
@@ -201,7 +205,7 @@ def evaluate_model(
 
 
 # Create Dataset and Split into Train and Test Sets
-train_dataset, test_dataset = load_dataset('data_loader/pastis/train_test_split.json')
+train_dataset, test_dataset = load_dataset("data_loader/pastis/train_test_split.json")
 num_classes = 19
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -231,7 +235,7 @@ config = {
 # Initialize the TSViT Model
 model = TSViT(
     config,
-    img_res=128,
+    img_res=32,
     num_channels=[10],
     num_classes=num_classes,
     max_seq_len=37,
