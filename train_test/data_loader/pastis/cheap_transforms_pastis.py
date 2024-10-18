@@ -2,13 +2,13 @@ import torch
 import numpy as np
 import json
 
-from dates_management import (
+from data_loader.pastis.dates_management import (
     get_features_by_id,
     number_dates_by_difference,
 )
 
 
-with open("metadata.geojson") as f:
+with open("data_loader/pastis/metadata.geojson") as f:
 
     metadata = json.load(f)
 
@@ -124,9 +124,7 @@ class SimpleTransform:
     def __init__(self, seq_len):
         self.to_tensor = ToTensor()
         self.normalize = Normalize()
-        self.crop = Crop(
-            img_size=128, crop_size=24, random=True, ground_truths=["labels"]
-        )
+        self.crop = Crop()
         self.cut = Cut(seq_len)
 
     def __call__(self, sample):
