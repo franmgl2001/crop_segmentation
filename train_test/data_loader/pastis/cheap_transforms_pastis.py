@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import json
 
-from dates_management import get_features_by_id, number_dates_by_difference
+from data_loader.pastis.dates_management import get_features_by_id, number_dates_by_difference
 
 
 with open("metadata.geojson") as f:
