@@ -15,6 +15,7 @@ class CropDataset(Dataset):
         return len(self.image_ids)
 
     def __getitem__(self, idx):
+        print("GET ITEM")
         image_id = self.image_ids[idx]
         inputs, labels, doy = process_image(image_id, self.seq_len, "../../../../datasets/PASTIS/PASTIS-R")
         print(inputs.shape)
