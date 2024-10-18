@@ -192,7 +192,7 @@ def evaluate_model(
 
 
 # Create Dataset and Split into Train and Test Sets
-train_dataset, test_dataset = load_dataset('train_test_split.json')
+train_dataset, test_dataset = load_dataset('data_loader/pastis/train_test_split.json')
 num_classes = 19
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
