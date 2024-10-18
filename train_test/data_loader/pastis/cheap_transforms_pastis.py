@@ -131,7 +131,7 @@ def process_image(image_id, seq_len=37, root_path="."):
 
     # Load inputs and labels
     inputs = np.load(f"{root_path}/DATA_S2/S2_{image_id}.npy")
-    labels = np.load(f"{root_path}/INSTANCE_ANNOTATIONS/TARGET_{image_id}.npy")[:1]
+    labels = np.load(f"{root_path}/ANNOTATIONS/TARGET_{image_id}.npy")[:1]
 
 
     # Get the feature with the given ID
