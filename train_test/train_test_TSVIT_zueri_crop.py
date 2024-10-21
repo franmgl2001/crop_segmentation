@@ -32,7 +32,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
             print(inputs.shape, labels.shape)
 
             iteration += 1
-            inputs = inputs.permute(0, 1, 3, 4, 2)  # New shape: [8, 37, 128, 128, 10]
+
             print(inputs.shape, labels.shape)
 
             B, T, H, W, C = inputs.shape

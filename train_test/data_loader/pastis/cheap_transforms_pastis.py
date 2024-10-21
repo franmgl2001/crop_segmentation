@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import json
-
+import torch.nn.functional as F
 from data_loader.pastis.dates_management import (
     get_features_by_id,
     number_dates_by_difference,
@@ -119,6 +119,31 @@ class Cut:
 
         return sample
 
+class UnkMask(object):
+    """
+    Extract mask of unk classes in labels
+    items in  : inputs, *inputs_backward, labels, seq_lengths
+    items out : inputs, *inputs_backward, labels, seq_lengths, unk_masks
+    """
+
+    def __init__(self, unk_class, ground_truth_target):
+        assert isinstance(unk_class, (int,))
+        self.unk_class = unk_class
+        self.ground_truth_target = ground_truth_target
+
+    def __call__(self, sample):
+        sample['unk_masks'] = (sample[self.ground_truth_target] != self.unk_class) #& \
+        if 'labels_grid' in sample.keys():
+            sample['unk_masks_grid'] = self.rescale_2d_map(sample['unk_masks'].to(torch.float32), mode='nearest').to(
+                torch.bool)
+
+        return sample
+
+    def rescale_2d_map(self, image, mode):
+        img = image.unsqueeze(0).permute(0, 3, 1, 2)  # permute(2, 0, 1). put height and width in front
+        img = F.upsample(img, size=(self.num_grid, self.num_grid), mode=mode)
+        img = img.squeeze(0).permute(1, 2, 0)  # move back
+        return img
 
 class SimpleTransform:
     def __init__(self, seq_len):
@@ -128,13 +153,15 @@ class SimpleTransform:
             img_size=128, crop_size=24, random=True, ground_truths=["labels"]
         )
         self.cut = Cut(seq_len)
+        self.mask = UnkMask(unk_class=19, ground_truth_target='labels')
 
     def __call__(self, sample):
         tensor_sample = self.to_tensor(sample)
         normalized_sample = self.normalize(tensor_sample)
         cropped_sample = self.crop(normalized_sample)
         cut_sample = self.cut(cropped_sample)
-        return cut_sample
+        masked_sample = self.mask(cut_sample)
+        return masked_sample
 
 
 class Crop(object):
