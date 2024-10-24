@@ -204,7 +204,7 @@ test_dataset = CustomDataset(
     "csvs/test_zuericrop_8.txt", "../../datasets/zuericrop/dataset"
 )
 
-num_classes = 8
+num_classes = 11
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
