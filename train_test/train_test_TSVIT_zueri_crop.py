@@ -27,13 +27,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
         running_loss = 0.0
         for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
-            unique_labels = torch.unique(labels)
-            print(f"Unique labels in this batch: {unique_labels}")
-            print(inputs.shape, labels.shape)
-
             iteration += 1
-
-            print(inputs.shape, labels.shape)
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
