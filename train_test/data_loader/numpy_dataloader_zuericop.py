@@ -32,7 +32,7 @@ class CustomDataset(Dataset):
             image = np.load(image_path)
 
             # Load label data from 'gt_relabeled.npy'
-            label_path = os.path.join(folder_path, "gt_relabeled.npy")
+            label_path = os.path.join(folder_path, "gt_relabeled_5.npy")
             label = np.load(label_path)
             label = np.squeeze(label)
 
