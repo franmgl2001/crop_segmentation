@@ -1,0 +1,1 @@
+curl --request POST --url https://services.sentinel-hub.com/auth/realms/main/protocol/openid-connect/token --header 'content-type: application/x-www-form-urlencoded' --data 'grant_type=client_credentials&client_id=74b46c15-4173-4ce6-8901-288849db1b87' --data-urlencode 'client_secret=xdKXMTm1Jea2D3Urc2S2J3Ayc5HAQAjE'
