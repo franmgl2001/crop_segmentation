@@ -4,7 +4,7 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 from sentinelhub import SHConfig
 
-csv = pd.read_csv("Lucas_italy/Lucas_points_2022.csv")
+csv = pd.read_csv("FASTFARM/fields.csv")
 
 row = csv.iloc[1]
 process_sentinel_images(

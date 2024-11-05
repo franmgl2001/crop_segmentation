@@ -5,7 +5,19 @@ from functions.sentinel_hub_request import (
     download_sentinel_image,
 )
 import pandas as pd
+from dotenv import load_dotenv
+import os
 
+load_dotenv(dotenv_path="env/.env.local")
+# Define the path to the .env.local file
+env_path = os.path.join('env', '.env.local')
+if os.path.exists("env/.env.local"):
+    print(f"Loading environment from {env_path}")
+else:
+    print("File not found:", env_path)
+
+
+print(env_path)
 
 from sentinelhub import SHConfig
 
@@ -13,8 +25,8 @@ from sentinelhub import SHConfig
 config = SHConfig()
 
 # Set your client ID, client secret, and instance ID
-config.sh_client_id = ""
-config.sh_client_secret = ""
+config.sh_client_id = os.getenv("CLIENT_ID")
+config.sh_client_secret = os.getenv("CLIENT_SECRET")
 
 config.save()
 
@@ -76,7 +88,7 @@ def process_sentinel_images(
     images = list_all_available_images(bbox, start_date, end_date, config)
 
     # Register the image metadata to a CSV file
-    output_file = f"dataset/image_list/{point_id}_images.csv"
+    output_file = f"images/image_list/{point_id}_images.csv"
     register_image(images, output_file=output_file)
 
     print(f"Found {len(images)} images for the year {start_date[:4]}.")
@@ -86,4 +98,5 @@ def process_sentinel_images(
 
     # Download images based on the metadata
     for _, row in df.iterrows():
+        print(f"Downloading image for date: {row['Date']}")
         download_sentinel_image(config, bbox, row["Date"], point_id)

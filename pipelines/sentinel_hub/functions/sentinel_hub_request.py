@@ -63,8 +63,11 @@ def download_sentinel_image(
     Returns:
     - None: The image is saved locally as 'output_image.tiff'.
     """
-    # API Endpoint
-    url = "https://services.sentinel-hub.com/api/v1/process"
+
+    # If the polygon ID folder deos not exist, create it
+    if not os.path.exists(f"images/tiffs/{polygon_id}"):
+        os.makedirs(f"images/tiffs/{polygon_id}")
+
 
     if geometry_type == "bbox":
         betsiboka_bbox = BBox(bbox=coordinates, crs=CRS.WGS84)
@@ -91,7 +94,7 @@ def download_sentinel_image(
     }"""
 
     request = SentinelHubRequest(
-        data_folder="test_dir",
+        data_folder=f"images/tiffs/{polygon_id}",
         evalscript=evalscript,
         input_data=[
             SentinelHubRequest.input_data(
@@ -165,6 +168,8 @@ def list_all_available_images(bbox, start_date, end_date, config):
 
     # Collect all image metadata
     all_images = list(search_iterator)
+
+    print(len(all_images))
 
     return all_images
 
