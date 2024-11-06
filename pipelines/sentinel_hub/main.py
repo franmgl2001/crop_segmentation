@@ -6,14 +6,15 @@ from sentinelhub import SHConfig
 
 csv = pd.read_csv("FASTFARM/fields.csv")
 
-row = csv.iloc[1]
-process_sentinel_images(
-    (row["point_lat"], row["point_long"]),
-    row["point_id"],
-    area_hectares=10,
-    start_date="2022-01-01",
-    end_date="2022-12-31",
-)
+# For loop all the rows in the csv
+for index, row in csv.iterrows():
+    process_sentinel_images(
+        (row["point_lat"], row["point_long"]),
+        row["point_id"],
+        area_hectares=10,
+        start_date="2022-11-01",
+        end_date="2024-11-05",
+    )
 
 
 def process_images_parallel(csv_file):
