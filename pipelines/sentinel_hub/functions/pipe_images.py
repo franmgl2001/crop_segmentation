@@ -7,19 +7,16 @@ from functions.sentinel_hub_request import (
 import pandas as pd
 from dotenv import load_dotenv
 import os
+from sentinelhub import SHConfig
 
 load_dotenv(dotenv_path="env/.env.local")
 # Define the path to the .env.local file
-env_path = os.path.join('env', '.env.local')
+env_path = os.path.join("env", ".env.local")
 if os.path.exists("env/.env.local"):
     print(f"Loading environment from {env_path}")
 else:
     print("File not found:", env_path)
 
-
-print(env_path)
-
-from sentinelhub import SHConfig
 
 # Create a configuration object
 config = SHConfig()

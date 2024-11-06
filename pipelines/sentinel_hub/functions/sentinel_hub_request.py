@@ -21,6 +21,9 @@ from sentinelhub import (
     SHConfig,
 )
 
+from itertools import groupby
+from datetime import datetime
+
 
 def create_date_ranges(year):
     """
@@ -67,7 +70,6 @@ def download_sentinel_image(
     # If the polygon ID folder deos not exist, create it
     if not os.path.exists(f"images/tiffs/{polygon_id}"):
         os.makedirs(f"images/tiffs/{polygon_id}")
-
 
     if geometry_type == "bbox":
         betsiboka_bbox = BBox(bbox=coordinates, crs=CRS.WGS84)
@@ -162,16 +164,47 @@ def list_all_available_images(bbox, start_date, end_date, config):
         collection=DataCollection.SENTINEL2_L2A,  # Corrected argument name
         bbox=bounding_box,
         time=time_interval,
-        fields={"include": ["id", "geometry", "properties.datetime"]},
+        fields={
+            "include": [
+                "id",
+                "geometry",
+                "properties.datetime",
+                "properties.eo:cloud_cover",
+            ]
+        },
         limit=100,
     )
 
     # Collect all image metadata
     all_images = list(search_iterator)
 
-    print(len(all_images))
+    print(f"Found {len(all_images)} images in the specified date range.")
 
-    return all_images
+    # Sort results by date and cloud cover
+    all_images.sort(
+        key=lambda x: (
+            datetime.strptime(
+                x["properties"]["datetime"].rstrip("Z"), "%Y-%m-%dT%H:%M:%S"
+            ).date(),
+            x["properties"]["eo:cloud_cover"],
+        )
+    )
+
+    # Group by date and pick the lowest cloud cover per day
+    filtered_results = [
+        min(group, key=lambda x: x["properties"]["eo:cloud_cover"])
+        for _, group in groupby(
+            all_images,
+            key=lambda x: datetime.strptime(
+                x["properties"]["datetime"].rstrip("Z"), "%Y-%m-%dT%H:%M:%S"
+            ).date(),
+        )
+    ]
+
+    print(
+        f"Filtered to {len(filtered_results)} images with lowest cloud cover per day."
+    )
+    return filtered_results
 
 
 def download_sentinel_images_in_range(
@@ -237,8 +270,6 @@ def download_sentinel_images_in_range(
 
     # Fetch the image data for all dates in the range
     images_data = request.get_data()
-
-    print(images_data)
 
     # Save each image returned by the request
     for index, image in enumerate(images_data):

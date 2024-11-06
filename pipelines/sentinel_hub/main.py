@@ -6,6 +6,8 @@ from sentinelhub import SHConfig
 
 csv = pd.read_csv("FASTFARM/fields.csv")
 
+# Start in index 6
+csv = csv.iloc[6:]
 # For loop all the rows in the csv
 for index, row in csv.iterrows():
     process_sentinel_images(
