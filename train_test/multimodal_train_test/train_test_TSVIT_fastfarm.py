@@ -147,8 +147,8 @@ def evaluate_model(model, test_loader, criterion, num_classes, csv_filename="pre
     export_results_to_csv(results, "results_5.csv")
     model.train()  # Switch back to training mode
 
-train_dataset = CustomDataset("csvs/fastfarm/train.txt", "../../datasets/FASTFARM/main_transforms/pickles")
-test_dataset = CustomDataset("csvs/fastfarm/test.txt", "../../datasets/FASTFARM/main_transforms/pickles")
+train_dataset = CustomDataset("csvs/fastfarm/train.txt", "../../../datasets/FASTFARM/main_transforms/pickles")
+test_dataset = CustomDataset("csvs/fastfarm/test.txt", "../../../datasets/FASTFARM/main_transforms/pickles")
 
 num_classes = 11
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
