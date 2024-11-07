@@ -28,7 +28,7 @@ def get_folders_with_files(directory):
     return folders
 
 
-def extract_time_from(folder_name, root="tiffs/3979.0/"):
+def extract_time_from(folder_name, root="../tiffs"):
     # Construct the path to the JSON file
     json_file_path = os.path.join(root, folder_name, "request.json")
 
@@ -111,15 +111,15 @@ def are_all_masks_same(result):
 
 
 def main(field_id):
-    folders = get_folders_with_files(directory)
-    csv = pd.read_csv("fields.csv")
+    csv = pd.read_csv("../csvs/fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
     polygon = wkt.loads(polygon_wkt)
-    directory = f"tiffs/{field_id}"
-
+    polygon = Polygon([(y, x) for x, y in polygon.exterior.coords])
+    directory = f"../tiffs/{field_id}.0"
+    folders = get_folders_with_files(directory)
     result = []
     for folder in folders:
-        time = extract_time_from(folder)
+        time = extract_time_from(folder, directory)
         cropped_image, cropped_mask = transform_mask(
             os.path.join(directory, folder, "response.tiff"), polygon
         )
@@ -133,6 +133,16 @@ def main(field_id):
             }
         )
 
-        # Save the results as a pickle file
-    with open(f"../../datasets/FastFarm/{field_id}.pkl", "wb") as pickle_file:
+    with open(f"../pickles/{field_id}.pkl", "wb") as pickle_file:
         pickle.dump(result, pickle_file)
+        print("Saved", field_id)
+
+
+# Read the CSV file
+# df = pd.read_csv("fields.csv")
+# unique_field_ids = df["point_id"].unique()
+
+unique_field_ids = [3979, 9802]
+
+for field_id in unique_field_ids:
+    main(field_id)
