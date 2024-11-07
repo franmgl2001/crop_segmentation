@@ -209,6 +209,46 @@ def create_days(data, year):
     return days
 
 
+import numpy as np
+import csv
+from collections import Counter
+
+
+def register_pixel_counts(mask, field_id, year, csv_filename="pixel_counts.csv"):
+    """
+    Registers the counts of 0, 1, and 2 pixels in a 2D NumPy array (mask) along with field_id and year.
+
+    Parameters:
+    - mask (np.ndarray): A 2D NumPy array containing pixel values (0, 1, or 2).
+    - field_id (str): Identifier for the field.
+    - year (str): Year or date range as a string, e.g., "2023" or "2024".
+    - csv_filename (str): The name of the CSV file to write the data to. Defaults to "pixel_counts.csv".
+    """
+    # Ensure the mask is a 2D array
+    if mask.ndim != 2:
+        raise ValueError("mask must be a 2D NumPy array")
+
+    # Count occurrences of 0, 1, and 2 in the mask
+    counts = Counter(mask.flatten())
+    count_0 = counts.get(0, 0)
+    count_1 = counts.get(1, 0)
+    count_2 = counts.get(2, 0)
+
+    # Write the counts to a CSV file
+    with open(csv_filename, mode="a", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+
+        # Write header if file is empty
+        csv_file.seek(0, 2)  # Move to the end of the file
+        if csv_file.tell() == 0:
+            writer.writerow(["field_id", "year", "0", "1", "2"])
+
+        # Write the data row
+        writer.writerow([field_id, year, count_0, count_1, count_2])
+
+    print(f"Registered counts for field_id: {field_id}, year: {year}")
+
+
 def main(field_id, years=[2023, 2024]):
     csv = pd.read_csv("../csvs/fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
@@ -243,7 +283,14 @@ def main(field_id, years=[2023, 2024]):
 
         # Save mask as relabeled png
         days = create_days(res, years[num])
+
+        plt.imshow(relabeled_mask)
+        plt.savefig("label.png")
         # Save the relabel mask as png
+
+        register_pixel_counts(relabeled_mask, field_id, years[num])
+
+        # Label the amount of 0, 1, 2 labels in the label
 
         with open(f"{field_id}_{years[num]}.pkl", "wb") as f:
             pickle.dump(
@@ -256,12 +303,12 @@ def main(field_id, years=[2023, 2024]):
             )
 
 
-# return result
-main(3979)
 
 
 # Read the CSV file
-# df = pd.read_csv("fields.csv")
-# unique_field_ids = df["point_id"].unique()
+df = pd.read_csv("csv/fields.csv")
+unique_field_ids = df["point_id"].unique()
 
-print(main(3979))
+for field_id in unique_field_ids:
+    main(field_id)
+    print(f"Finished processing field_id: {field_id}")
