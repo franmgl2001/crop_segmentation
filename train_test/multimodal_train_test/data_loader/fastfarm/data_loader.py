@@ -52,6 +52,9 @@ class CustomDataset(Dataset):
             # Optional rescaling
             input_tensor = input_tensor * 0.0001  # Adjust scaling as needed
 
+            # Return the input and mask tensors
+            input_tensor = input_tensor.permute(0,2,3,1)
+
             return input_tensor, mask_tensor
 
         except Exception as e:
