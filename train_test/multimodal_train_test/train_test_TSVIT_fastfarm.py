@@ -1,14 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader
 from models.TSViT import TSViT
-from data_loader.numpy_dataloader_zuericop import CustomDataset
+from data_loader.fastfarm.data_loader import CustomDataset
 import numpy as np
 import os
 import csv
-
-
 
 MAX_SEQ_LEN = 72
 
@@ -21,8 +19,6 @@ def export_results_to_csv(results, output_csv_path):
             writer.writerow(result)
     print(f"Results saved to {output_csv_path}")
 
-
-# Simplified Training Loop
 def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
     model.train()
     iteration = 0
@@ -33,86 +29,66 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
             iteration += 1
 
             B, T, H, W, C = inputs.shape
-            # Add channel that contains time steps
             time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
             time_channel = (
                 time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
-            )  # BxTxHxW
+            )
 
             inputs = torch.cat(
                 (inputs, time_channel[:, :, :, :, None]), dim=4
-            )  # Add time channel
+            )
             inputs = inputs.permute(0, 1, 4, 2, 3)
 
-            # Zero the parameter gradients
             optimizer.zero_grad()
-
-            # Forward + backward + optimize
             outputs = model(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-
-            # Print statistics
             running_loss += loss.item()
 
             print(
                 f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}",
                 end="\r",
             )
-
         print(
             f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}"
         )
     print("Finished Training")
 
-
-# Function to calculate IoU for each class
 def compute_iou_per_class(preds, labels, num_classes):
     ious = []
-    for cls in range(num_classes):
+    for cls in range(1, num_classes):  # Skip the background class (0)
         pred_cls = preds == cls
         true_cls = labels == cls
-
         intersection = np.logical_and(pred_cls, true_cls).sum()
         union = np.logical_or(pred_cls, true_cls).sum()
 
         if union == 0:
-            iou = float("nan")  # Ignore classes with no presence in both true and pred
+            iou = float("nan")
         else:
             iou = intersection / union
-
         ious.append(iou)
     return np.array(ious)
 
-
-def evaluate_model(
-    model, test_loader, criterion, num_classes, csv_filename="predictions_log.csv"
-):
+def evaluate_model(model, test_loader, criterion, num_classes, csv_filename="predictions_log.csv"):
     model.eval()
     total_loss = 0.0
     correct = 0
     total = 0
 
-    # Initialize counters for each class
     correct_per_class = torch.zeros(num_classes).to(device)
     total_per_class = torch.zeros(num_classes).to(device)
 
-    # To store predictions and labels for MIoU and mean accuracy
     all_preds = []
     all_labels = []
 
-    # Open CSV file to log predictions and labels
     with open(csv_filename, mode="w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["Index", "True Label", "Predicted Label"])  # CSV headers
+        writer.writerow(["Index", "True Label", "Predicted Label"])
 
         with torch.no_grad():
             for idx, (inputs, labels) in enumerate(test_loader):
                 inputs, labels = inputs.to(device), labels.to(device)
-
-                print(inputs.shape, labels.shape)
-
                 B, T, H, W, C = inputs.shape
                 time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
                 time_channel = (
@@ -126,90 +102,60 @@ def evaluate_model(
                 loss = criterion(outputs, labels)
                 total_loss += loss.item()
 
-                # Get predicted classes
                 _, predicted = torch.max(outputs, 1)
-
-                # Store predictions and labels for MIoU and mean accuracy
                 all_preds.append(predicted.cpu().numpy())
                 all_labels.append(labels.cpu().numpy())
 
-                # Flatten the labels and predictions before logging them
-                for i in range(labels.size(0)):  # Iterate through batch size
+                for i in range(labels.size(0)):
                     flattened_labels = labels[i].flatten().cpu().numpy()
                     flattened_predictions = predicted[i].flatten().cpu().numpy()
-
-                    # Log all pixels for this image
                     for j in range(len(flattened_labels)):
-                        writer.writerow(
-                            [idx * B + i, flattened_labels[j], flattened_predictions[j]]
-                        )
+                        writer.writerow([idx * B + i, flattened_labels[j], flattened_predictions[j]])
 
-                # Update global accuracy
-                correct += (predicted == labels).sum().item()
-                total += labels.numel()
+                correct += ((predicted == labels) & (labels != 0)).sum().item()
+                total += (labels != 0).sum().item()
 
-                # Update per-class accuracy
-                for label in range(num_classes):
-                    correct_per_class[label] += (
-                        ((predicted == labels) & (labels == label)).sum().item()
-                    )
+                for label in range(1, num_classes):  # Skip background class 0
+                    correct_per_class[label] += ((predicted == labels) & (labels == label)).sum().item()
                     total_per_class[label] += (labels == label).sum().item()
 
-    # Convert all predictions and labels to numpy arrays for MIoU and mean accuracy calculation
     all_preds = np.concatenate(all_preds, axis=0)
     all_labels = np.concatenate(all_labels, axis=0)
 
-    # Calculate per-class IoU
     ious = compute_iou_per_class(all_preds, all_labels, num_classes)
     mean_iou = np.nanmean(ious)
     print(f"Mean Intersection over Union (MIoU): {mean_iou:.4f}")
 
-    # Calculate per-class accuracy
     class_accuracies = 100 * correct_per_class / total_per_class
-    mean_accuracy = torch.nanmean(class_accuracies).item()
+    mean_accuracy = torch.nanmean(class_accuracies[1:]).item()
 
-    # Calculate and print overall accuracy
     avg_loss = total_loss / len(test_loader)
     overall_accuracy = 100 * correct / total
     print(f"Test Loss: {avg_loss:.4f}, Overall Accuracy: {overall_accuracy:.2f}%")
 
-    # Prepare data for CSV export of accuracy and IoU results
     results = []
-    for i in range(num_classes):
-        class_iou = ious[i]
+    for i in range(1, num_classes):  # Skip background class 0
+        class_iou = ious[i-1]  # Adjust index since we skip 0
         class_accuracy = (
             class_accuracies[i].item() if total_per_class[i] > 0 else float("nan")
         )
-        results.append(
-            {"Class": i + 1, "Overall Accuracy": class_accuracy, "MIoU": class_iou}
-        )
+        results.append({"Class": i, "Overall Accuracy": class_accuracy, "MIoU": class_iou})
 
-    # Print per-class IoU and accuracy
-    for i in range(num_classes):
-        print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
+    for i in range(1, num_classes):
+        print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i-1]:.4f}")
 
     export_results_to_csv(results, "results_5.csv")
-
     model.train()  # Switch back to training mode
 
-
-# Create Dataset and Split into Train and Test Sets
-train_dataset = CustomDataset(
-    "csvs/train_zuericrop_8.txt", "../../datasets/zuericrop/dataset"
-)
-test_dataset = CustomDataset(
-    "csvs/test_zuericrop_8.txt", "../../datasets/zuericrop/dataset"
-)
+train_dataset = CustomDataset("csvs/fastfarm/train.txt", "../../datasets/FASTFARM/main_transforms/pickles")
+test_dataset = CustomDataset("csvs/fastfarm/test.txt", "../../datasets/FASTFARM/main_transforms/pickles")
 
 num_classes = 11
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=8)
-test_loader = DataLoader(test_dataset, batch_size=2, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=8)
+test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
 
-# Model Configuration
 patch_size = 2
 config = {
     "patch_size": patch_size,
@@ -227,31 +173,19 @@ config = {
     "depth": 4,
 }
 
-# Initialize the TSViT Model
 model = TSViT(
     config,
     img_res=24,
     num_channels=[num_classes],
     num_classes=num_classes,
-    max_seq_len=72,
+    max_seq_len=MAX_SEQ_LEN,
     patch_embedding="Channel Encoding",
 )
-print("Done creating model")
-
-
-# Loss Function and Optimizer
-criterion = nn.CrossEntropyLoss()  # Ignore the background class
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-# Set device
-
 model.to(device)
 
-# Train the Model
+criterion = nn.CrossEntropyLoss(ignore_index=0)  # Ignore the background class
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
 train_model(model, train_loader, criterion, optimizer)
-
-# Evaluate the Model on Test Set
 evaluate_model(model, test_loader, criterion, num_classes)
-
-# Save the Model
 torch.save(model.state_dict(), "tsvit_model.pth")
