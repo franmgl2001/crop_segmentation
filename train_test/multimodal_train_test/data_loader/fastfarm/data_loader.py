@@ -24,7 +24,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         """
-        Get the input and mask tensors for the given index.
+        Get the image and mask tensors for the given index.
         """
         file_path = self.data_paths[idx]
 
@@ -33,8 +33,8 @@ class CustomDataset(Dataset):
             with open(file_path, "rb") as f:
                 data = pickle.load(f)
 
-            # Extract the 'input' and 'mask' keys
-            input_data = data['input']
+            # Extract the 'image' and 'mask' keys
+            input_data = data['image']
             mask_data = data['mask']
 
             # Convert to PyTorch tensors
@@ -43,9 +43,9 @@ class CustomDataset(Dataset):
 
             # Apply Cut if the input length exceeds max_seq_len
             if input_tensor.shape[0] > self.max_seq_len:
-                sample = {"inputs": input_tensor, "doy": data.get("doy", None)}  # Include DOY if present
+                sample = {"image": input_tensor, "doy": data.get("doy", None)}  # Include DOY if present
                 sample = self.cut(sample)
-                input_tensor = sample["inputs"]
+                input_tensor = sample["image"]
                 if sample.get("doy") is not None:
                     data["doy"] = sample["doy"]
 
@@ -73,17 +73,17 @@ def load_data(txt_file, root_dir, batch_size=4, shuffle=True, max_seq_len=73):
 
 class Cut:
     """
-    Randomly selects `seq_len` points from inputs and DOY arrays if seq_len exceeds the threshold.
+    Randomly selects `seq_len` points from image and DOY arrays if seq_len exceeds the threshold.
     """
 
     def __init__(self, seq_len):
         self.seq_len = seq_len
 
     def __call__(self, sample):
-        inputs = sample["inputs"]
+        image = sample["image"]
         doy = sample.get("doy", None)  # Get DOY if present
 
-        total_len = inputs.shape[0]
+        total_len = image.shape[0]
 
         # Ensure the requested seq_len does not exceed available length
         if self.seq_len > total_len:
@@ -94,9 +94,9 @@ class Cut:
         # Randomly select and sort the indices for temporal consistency
         indices = torch.randperm(total_len)[: self.seq_len].sort()[0]
 
-        # Cut the inputs (and DOY if present) using the selected indices
-        cut_inputs = inputs[indices]
-        sample["inputs"] = cut_inputs
+        # Cut the image (and DOY if present) using the selected indices
+        cut_image = image[indices]
+        sample["image"] = cut_image
         if doy is not None:
             cut_doy = doy[indices]
             sample["doy"] = cut_doy
