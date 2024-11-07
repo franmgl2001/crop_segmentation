@@ -9,6 +9,8 @@ from shapely import wkt
 from shapely.geometry import mapping, Polygon
 import numpy as np
 import pickle
+from datetime import datetime
+import matplotlib.pyplot as plt
 
 
 def get_folders_with_files(directory):
@@ -110,7 +112,104 @@ def are_all_masks_same(result):
     return all(np.array_equal(entry["cropped_mask"], first_mask) for entry in result)
 
 
-def main(field_id):
+def separate_data_by_years(data):
+    """
+    Separates the data into two lists based on yearly ranges.
+
+    Parameters:
+    - data (list): List of dictionaries, each containing a 'time' key in ISO format.
+
+    Returns:
+    - tuple: Two lists of dictionaries, one for November 2022 to November 2023 and
+             one for November 2023 to November 2024.
+    """
+    # Define the date ranges
+    start_nov_2022 = datetime(2022, 11, 5)
+    end_nov_2023 = datetime(2023, 11, 5)
+    end_nov_2024 = datetime(2024, 11, 5)
+
+    # Sort the data by 'time'
+    data.sort(key=lambda x: datetime.strptime(x["time"], "%Y-%m-%dT%H:%M:%SZ"))
+
+    # Filter data for each date range
+    nov_2022_to_nov_2023 = [
+        entry
+        for entry in data
+        if start_nov_2022
+        <= datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ")
+        < end_nov_2023
+    ]
+    nov_2023_to_nov_2024 = [
+        entry
+        for entry in data
+        if end_nov_2023
+        <= datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ")
+        < end_nov_2024
+    ]
+
+    return nov_2022_to_nov_2023, nov_2023_to_nov_2024
+
+
+def stack_images_by_time(data):
+    # Load the pickle file
+
+    # Sort the data by the 'time' field to ensure chronological order
+    data.sort(key=lambda x: datetime.strptime(x["time"], "%Y-%m-%dT%H:%M:%SZ"))
+
+    # Verify the timestamps are in order
+    timestamps = [entry["time"] for entry in data]
+    for i in range(1, len(timestamps)):
+        if datetime.strptime(timestamps[i], "%Y-%m-%dT%H:%M:%SZ") < datetime.strptime(
+            timestamps[i - 1], "%Y-%m-%dT%H:%M:%SZ"
+        ):
+            print("Error: Timestamps are out of order!")
+            return None
+
+    print("Timestamps are in chronological order.")
+
+    # Stack all 'cropped_image' arrays into a single SITS array
+    sits_array = np.stack([entry["cropped_image"] for entry in data])
+
+    print(f"Created SITS with shape: {sits_array.shape}")
+    return sits_array
+
+
+def get_fielduse_count(field_id, year):
+    fielduses = pd.read_csv("../csvs/fielduses.csv")
+    fields_fielduses = fielduses[fielduses["field_id"] == field_id]
+    start_date = pd.to_datetime(f"{year-1}-11-05").tz_localize(None)
+    end_date = pd.to_datetime(f"{year}-11-05").tz_localize(None)
+    fields_fielduses["prediction"] = pd.to_datetime(fields_fielduses["prediction"])
+
+    fields_fielduses = fields_fielduses[
+        (fields_fielduses["prediction"] >= start_date)
+        & (fields_fielduses["prediction"] <= end_date)
+    ]
+
+    # Get the fielduse count
+    return len(fields_fielduses)
+
+
+def relabel_mask(mask, field_id, year):
+    fielduse_count = get_fielduse_count(field_id, year)
+    mask = mask.astype(int)
+    mask[mask == 1] = fielduse_count
+
+    return mask
+
+
+def get_time_keys(data):
+    return [datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ") for entry in data]
+
+
+def create_days(data, year):
+    start_date = pd.to_datetime(f"{year-1}-11-05").tz_localize(None)
+    time_keys = get_time_keys(data)
+    days = [(time_key - start_date).days for time_key in time_keys]
+    return days
+
+
+def main(field_id, years=[2023, 2024]):
     csv = pd.read_csv("../csvs/fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
     polygon = wkt.loads(polygon_wkt)
@@ -133,16 +232,36 @@ def main(field_id):
             }
         )
 
-    with open(f"../pickles/{field_id}.pkl", "wb") as pickle_file:
-        pickle.dump(result, pickle_file)
-        print("Saved", field_id)
+    # Seperate the data per year
+    results = separate_data_by_years(result)
+
+    for num, res in enumerate(results):
+        if len(res) == 0:
+            return
+        sits_array = stack_images_by_time(res)
+        relabeled_mask = relabel_mask(res[0]["cropped_mask"], field_id, years[num])
+
+        # Save mask as relabeled png
+        days = create_days(res, years[num])
+        # Save the relabel mask as png
+
+        with open(f"{field_id}_{years[num]}.pkl", "wb") as f:
+            pickle.dump(
+                {
+                    "image": sits_array,
+                    "mask": relabeled_mask,
+                    "doy": days,
+                },
+                f,
+            )
+
+
+# return result
+main(3979)
 
 
 # Read the CSV file
 # df = pd.read_csv("fields.csv")
 # unique_field_ids = df["point_id"].unique()
 
-unique_field_ids = [3979, 9802]
-
-for field_id in unique_field_ids:
-    main(field_id)
+print(main(3979))
