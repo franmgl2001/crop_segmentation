@@ -28,39 +28,34 @@ class CustomDataset(Dataset):
         """
         file_path = self.data_paths[idx]
 
-        try:
-            # Load data from the .pickle file
-            with open(file_path, "rb") as f:
-                data = pickle.load(f)
+        # Load data from the .pickle file
+        with open(file_path, "rb") as f:
+            data = pickle.load(f)
 
-            # Extract the 'image' and 'mask' keys
-            input_data = data['image']
-            mask_data = data['mask']
+        # Extract the 'image' and 'mask' keys
+        input_data = data['image']
+        mask_data = data['mask']
 
-            # Convert to PyTorch tensors
-            input_tensor = torch.tensor(input_data, dtype=torch.float32)
-            mask_tensor = torch.tensor(mask_data, dtype=torch.long)
+        # Convert to PyTorch tensors
+        input_tensor = torch.tensor(input_data, dtype=torch.float32)
+        mask_tensor = torch.tensor(mask_data, dtype=torch.long)
 
             # Apply Cut if the input length exceeds max_seq_len
-            if input_tensor.shape[0] > self.max_seq_len:
-                sample = {"image": input_tensor, "doy": data.get("doy", None)}  # Include DOY if present
-                sample = self.cut(sample)
-                input_tensor = sample["image"]
-                if sample.get("doy") is not None:
-                    data["doy"] = sample["doy"]
+        if input_tensor.shape[0] > self.max_seq_len:
+            sample = {"image": input_tensor, "doy": data.get("doy", None)}  # Include DOY if present
+            sample = self.cut(sample)
+            input_tensor = sample["image"]
+            if sample.get("doy") is not None:
+                data["doy"] = sample["doy"]
 
-            # Optional rescaling
-            input_tensor = input_tensor * 0.0001  # Adjust scaling as needed
+        # Optional rescaling
+        input_tensor = input_tensor * 0.0001  # Adjust scaling as needed
 
-            # Return the input and mask tensors
-            input_tensor = input_tensor.permute(0,2,3,1)
+        # Return the input and mask tensors
+        input_tensor = input_tensor.permute(0,2,3,1)
 
-            return input_tensor, mask_tensor
+        return input_tensor, mask_tensor
 
-        except Exception as e:
-            print(f"Error loading data from {file_path}: {e}")
-            # Return empty tensors if there's an error
-            return torch.tensor([]), torch.tensor([])
 
 def load_data(txt_file, root_dir, batch_size=4, shuffle=True, max_seq_len=73):
     """
