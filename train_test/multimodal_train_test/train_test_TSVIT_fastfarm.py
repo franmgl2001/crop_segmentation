@@ -68,7 +68,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
 # Function to calculate IoU for each class
 def compute_iou_per_class(preds, labels, num_classes):
     ious = []
-    for cls in range(num_classes):
+    for cls in range(1, num_classes):
         pred_cls = preds == cls
         true_cls = labels == cls
 
