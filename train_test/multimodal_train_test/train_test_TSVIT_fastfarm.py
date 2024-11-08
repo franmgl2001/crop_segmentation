@@ -173,13 +173,13 @@ def evaluate_model(
 
     # Prepare data for CSV export of accuracy and IoU results
     results = []
-    for i in range(num_classes):
-        class_iou = ious[i]
+    for i in range(1, num_classes):
+        class_iou = ious[i - 1]  # Adjust indexing since we skip class 0
         class_accuracy = (
             class_accuracies[i].item() if total_per_class[i] > 0 else float("nan")
         )
         results.append(
-            {"Class": i + 1, "Overall Accuracy": class_accuracy, "MIoU": class_iou}
+            {"Class": i, "Overall Accuracy": class_accuracy, "MIoU": class_iou}
         )
 
     # Print per-class IoU and accuracy
@@ -238,7 +238,7 @@ print("Done creating model")
 
 
 # Loss Function and Optimizer
-criterion = nn.CrossEntropyLoss()  # Ignore the background class
+criterion = nn.CrossEntropyLoss(ignore_index=0)  # Ignore the background class
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Set device
