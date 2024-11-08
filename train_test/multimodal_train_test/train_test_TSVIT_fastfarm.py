@@ -183,7 +183,7 @@ def evaluate_model(
         )
 
     # Print per-class IoU and accuracy
-    for i in range(1, num_classes):
+    for i in range(num_classes-1):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
     export_results_to_csv(results, "results_5.csv")
@@ -239,7 +239,7 @@ print("Done creating model")
 
 # Loss Function and Optimizer
 criterion = nn.CrossEntropyLoss(ignore_index=0)  # Ignore the background class
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 # Set device
 
