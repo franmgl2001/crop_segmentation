@@ -76,7 +76,7 @@ class Cut:
 
     def __call__(self, sample):
         image = sample["image"]
-        doy = sample.get("doy", None)  # Get DOY if present
+        #doy = sample.get("doy", None)  # Get DOY if present
 
         total_len = image.shape[0]
 
@@ -92,8 +92,8 @@ class Cut:
         # Cut the image (and DOY if present) using the selected indices
         cut_image = image[indices]
         sample["image"] = cut_image
-        if doy is not None:
-            cut_doy = doy[indices]
-            sample["doy"] = cut_doy
+        #if doy is not None:
+            #cut_doy = doy[indices]
+            #sample["doy"] = cut_doy
 
         return sample
