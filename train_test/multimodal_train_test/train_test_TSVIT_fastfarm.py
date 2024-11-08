@@ -199,7 +199,7 @@ test_dataset = CustomDataset(
     "csvs/fastfarm/test.txt",  "../../../datasets/FASTFARM/main_transforms/pickles"
 )
 
-num_classes = 2
+num_classes = 3
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
