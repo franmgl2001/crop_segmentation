@@ -76,7 +76,7 @@
 
 ## 6. Observations
 
-- **Strengths** The model is good labeling many classes, although it doesn't do really good in the last one.
-- **Weaknesses**: I removed some classes that had diferent not unbalanced pixels.
+- **Strengths** The model labels with high accuracy classes.
+- **Weaknesses**: It doesn't have many classes.
 - **Further Improvements**: I think this model could work better if we had a more balanced dataset. Probably group by the 4th class of zuercrop could help with this trainings.
 
