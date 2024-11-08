@@ -272,6 +272,8 @@ def main(field_id, years=[2023, 2024]):
             }
         )
 
+    
+
     # Seperate the data per year
     results = separate_data_by_years(result)
 
