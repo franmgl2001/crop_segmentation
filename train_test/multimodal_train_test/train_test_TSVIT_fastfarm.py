@@ -183,7 +183,7 @@ def evaluate_model(
         )
 
     # Print per-class IoU and accuracy
-    for i in range(num_classes):
+    for i in range(1, num_classes):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
     export_results_to_csv(results, "results_5.csv")
