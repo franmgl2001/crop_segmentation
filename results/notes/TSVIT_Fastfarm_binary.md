@@ -68,7 +68,7 @@
 - **Training Time**: 15 minutes
 - **Crop Results**: [Results](../csvs/fastfarm_binary_results.csv)
 - **Test Loss**:
-- **Confusion Matrix**: ![Confusion Martix](../images/confusion_matrix_fastfarm_binary.png)
+- **Confusion Matrix**: ![Confusion Martix](../matrixes/confusion_matrix_fastfarm_binary.png)
 
 
 ---

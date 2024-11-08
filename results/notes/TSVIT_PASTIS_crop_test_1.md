@@ -68,7 +68,7 @@
 - **Training Time**: 4 hours
 - **Crop Results**: [Results](../csvs/pastis_1_results.csv)
 - **Test Loss**:
-- **Confusion Matrix**: ![Confusion Martix](../images/confusion_matrix_PASTIS%201.png)
+- **Confusion Matrix**: ![Confusion Martix](../matrixes/confusion_matrix_PASTIS%201.png)
 
 
 ---

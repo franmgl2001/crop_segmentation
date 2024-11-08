@@ -69,7 +69,7 @@
 - **Training Time**: 13 hours
 - **Crop Results**: [Results](../csvs/zueri_crop_6_results.csv)
 - **Test Loss**: 0.6512
-- **Confusion Matrix**: ![Confusion Martix](../images/confusion_matrix_zuericrop%207.png)
+- **Confusion Matrix**: ![Confusion Martix](../matrixes/confusion_matrix_zuericrop%207.png)
 
 
 ---
