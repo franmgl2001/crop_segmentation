@@ -10,6 +10,7 @@ import csv
 
 MAX_SEQ_LEN = 73
 
+
 def export_results_to_csv(results, output_csv_path):
     csv_columns = ["Class", "Overall Accuracy", "MIoU"]
     with open(output_csv_path, mode="w", newline="") as file:
@@ -143,8 +144,14 @@ def evaluate_model(
                         )
 
                 # Update global accuracy
-                correct += (predicted == labels).sum().item()
-                total += labels.numel()
+                # Filter out predictions and labels with label 0
+                non_zero_mask = labels != 0
+                filtered_preds = predicted[non_zero_mask]
+                filtered_labels = labels[non_zero_mask]
+
+                # Update accuracy calculation
+                correct += (filtered_preds == filtered_labels).sum().item()
+                total += filtered_labels.numel()
 
                 # Update per-class accuracy
                 for label in range(num_classes):
@@ -183,7 +190,7 @@ def evaluate_model(
         )
 
     # Print per-class IoU and accuracy
-    for i in range(num_classes-1):
+    for i in range(num_classes - 1):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
     export_results_to_csv(results, "results_5.csv")
@@ -196,7 +203,7 @@ train_dataset = CustomDataset(
     "csvs/fastfarm/train.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
 )
 test_dataset = CustomDataset(
-    "csvs/fastfarm/test.txt",  "../../../datasets/FASTFARM/main_transforms/pickles"
+    "csvs/fastfarm/test.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
 )
 
 num_classes = 3
