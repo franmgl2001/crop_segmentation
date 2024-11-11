@@ -25,9 +25,9 @@ As shown the in the following figures the padding works well when doing it forwa
 
 
 **Front Padding probability changes:**
-![Result](./images/average_probabilities.png)
+![Result](./plots/average_probabilities.png)
 **Back Padding probability changes:**
-![Result2](./images/average_probabilities_backward.png)
+![Result2](./plots/average_probabilities_backward.png)
 
 
 ---
