@@ -330,7 +330,7 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
 
 # Read the CSV file
 df = pd.read_csv("../csvs/fields.csv")
-unique_field_ids = df["point_id"].unique()
+unique_field_ids = df["field_id"].unique()
 
 for field_id in unique_field_ids:
     main(field_id, relabel="crop")
