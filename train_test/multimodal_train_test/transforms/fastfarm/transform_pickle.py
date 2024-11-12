@@ -218,6 +218,11 @@ def relabel_crop_mask(mask, field_id, year):
                 relabel_json[row["fielduse_crop_id"]],
             )
             mask[mask == 1] = relabel_json[row["fielduse_crop_id"]]
+
+    # If no relabeling relabel to 0
+    if 1 in mask:
+        print("Relabeling to 0")
+        mask[mask == 1] = 0
     return mask
 
 
