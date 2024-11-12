@@ -13,6 +13,9 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 
+relabel_json = {1: 1, 2: 2, 14: 3, 17: 4}
+
+
 def get_folders_with_files(directory):
     folders = []
 
@@ -207,7 +210,7 @@ def relabel_crop_mask(mask, field_id, year):
     # Relabel to the first fielduse that is not a 4
     for index, row in fielduses.iterrows():
         if row["fielduse_id"] != 4:
-            mask[mask == 1] = row["fielduse_id"]
+            mask[mask == 1] = relabel_json[str(row["fielduse_id"])]
     return mask
 
 
