@@ -175,6 +175,10 @@ def stack_images_by_time(data):
 
 
 def get_fielduse_count(field_id, year):
+    return len(get_field_id_fielduses(field_id, year))
+
+
+def get_field_id_fielduses(field_id, year):
     fielduses = pd.read_csv("../csvs/fielduses.csv")
     fields_fielduses = fielduses[fielduses["field_id"] == field_id]
     start_date = pd.to_datetime(f"{year-1}-11-05").tz_localize(None)
@@ -186,8 +190,7 @@ def get_fielduse_count(field_id, year):
         & (fields_fielduses["prediction"] <= end_date)
     ]
 
-    # Get the fielduse count
-    return len(fields_fielduses)
+    return fields_fielduses
 
 
 def relabel_mask(mask, field_id, year):
@@ -195,6 +198,16 @@ def relabel_mask(mask, field_id, year):
     mask = mask.astype(int)
     mask[mask == 1] = fielduse_count
 
+    return mask
+
+
+def relabel_crop_mask(mask, field_id, year):
+    fielduses = get_field_id_fielduses(field_id, year)
+    mask = mask.astype(int)
+    # Relabel to the first fielduse that is not a 4
+    for index, row in fielduses.iterrows():
+        if row["fielduse_id"] != 4:
+            mask[mask == 1] = row["fielduse_id"]
     return mask
 
 
@@ -249,7 +262,7 @@ def register_pixel_counts(mask, field_id, year, csv_filename="pixel_counts.csv")
     print(f"Registered counts for field_id: {field_id}, year: {year}")
 
 
-def main(field_id, years=[2023, 2024]):
+def main(field_id, relabel="Binary", years=[2023, 2024]):
     csv = pd.read_csv("../csvs/fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
     polygon = wkt.loads(polygon_wkt)
@@ -272,8 +285,6 @@ def main(field_id, years=[2023, 2024]):
             }
         )
 
-    
-
     # Seperate the data per year
     results = separate_data_by_years(result)
 
@@ -281,7 +292,12 @@ def main(field_id, years=[2023, 2024]):
         if len(res) == 0:
             return
         sits_array = stack_images_by_time(res)
-        relabeled_mask = relabel_mask(res[0]["cropped_mask"], field_id, years[num])
+        if relabel == "Binary":
+            relabeled_mask = relabel_mask(res[0]["cropped_mask"], field_id, years[num])
+        else:
+            relabeled_mask = relabel_crop_mask(
+                res[0]["cropped_mask"], field_id, years[num]
+            )
 
         # Save mask as relabeled png
         days = create_days(res, years[num])
@@ -305,12 +321,10 @@ def main(field_id, years=[2023, 2024]):
             )
 
 
-
-
 # Read the CSV file
 df = pd.read_csv("csv/fields.csv")
 unique_field_ids = df["point_id"].unique()
 
 for field_id in unique_field_ids:
-    main(field_id)
+    main(field_id, relabel="crop")
     print(f"Finished processing field_id: {field_id}")
