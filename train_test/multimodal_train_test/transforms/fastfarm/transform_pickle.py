@@ -210,6 +210,7 @@ def relabel_crop_mask(mask, field_id, year):
     # Relabel to the first fielduse that is not a 4
     for index, row in fielduses.iterrows():
         if row["fielduse_id"] != 4:
+            print("Relabeling to ", row["fielduse_id"])
             mask[mask == 1] = relabel_json[str(row["fielduse_id"])]
     return mask
 
@@ -230,25 +231,27 @@ import csv
 from collections import Counter
 
 
-def register_pixel_counts(mask, field_id, year, csv_filename="pixel_counts.csv"):
+def register_pixel_counts(
+    mask, field_id, year, num_classes, csv_filename="pixel_counts.csv"
+):
     """
-    Registers the counts of 0, 1, and 2 pixels in a 2D NumPy array (mask) along with field_id and year.
+    Registers the counts of pixel values in a 2D NumPy array (mask) for a specified number of classes,
+    along with field_id and year.
 
     Parameters:
-    - mask (np.ndarray): A 2D NumPy array containing pixel values (0, 1, or 2).
+    - mask (np.ndarray): A 2D NumPy array containing pixel values.
     - field_id (str): Identifier for the field.
     - year (str): Year or date range as a string, e.g., "2023" or "2024".
+    - num_classes (int): Number of classes in the mask (e.g., 3 for classes 0, 1, 2).
     - csv_filename (str): The name of the CSV file to write the data to. Defaults to "pixel_counts.csv".
     """
     # Ensure the mask is a 2D array
     if mask.ndim != 2:
         raise ValueError("mask must be a 2D NumPy array")
 
-    # Count occurrences of 0, 1, and 2 in the mask
+    # Count occurrences of each class in the mask
     counts = Counter(mask.flatten())
-    count_0 = counts.get(0, 0)
-    count_1 = counts.get(1, 0)
-    count_2 = counts.get(2, 0)
+    class_counts = [counts.get(i, 0) for i in range(num_classes)]
 
     # Write the counts to a CSV file
     with open(csv_filename, mode="a", newline="") as csv_file:
@@ -257,10 +260,11 @@ def register_pixel_counts(mask, field_id, year, csv_filename="pixel_counts.csv")
         # Write header if file is empty
         csv_file.seek(0, 2)  # Move to the end of the file
         if csv_file.tell() == 0:
-            writer.writerow(["field_id", "year", "0", "1", "2"])
+            header = ["field_id", "year"] + [str(i) for i in range(num_classes)]
+            writer.writerow(header)
 
         # Write the data row
-        writer.writerow([field_id, year, count_0, count_1, count_2])
+        writer.writerow([field_id, year] + class_counts)
 
     print(f"Registered counts for field_id: {field_id}, year: {year}")
 
@@ -313,7 +317,7 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
 
         # Label the amount of 0, 1, 2 labels in the label
 
-        with open(f"{field_id}_{years[num]}.pkl", "wb") as f:
+        with open(f"pickles_crops/{field_id}_{years[num]}.pkl", "wb") as f:
             pickle.dump(
                 {
                     "image": sits_array,
@@ -325,7 +329,7 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
 
 
 # Read the CSV file
-df = pd.read_csv("csv/fields.csv")
+df = pd.read_csv("../csvs/fields.csv")
 unique_field_ids = df["point_id"].unique()
 
 for field_id in unique_field_ids:
