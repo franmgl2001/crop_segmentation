@@ -211,7 +211,7 @@ def relabel_crop_mask(mask, field_id, year):
     for index, row in fielduses.iterrows():
         if row["fielduse_crop_id"] != 4:
             print("Relabeling to ", row["fielduse_crop_id"])
-            mask[mask == 1] = relabel_json[str(row["fielduse_crop_id"])]
+            mask[mask == 1] = relabel_json[row["fielduse_crop_id"]]
     return mask
 
 
