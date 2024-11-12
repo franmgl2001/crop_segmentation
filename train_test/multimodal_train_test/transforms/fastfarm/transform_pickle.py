@@ -325,7 +325,12 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
         plt.savefig("label.png")
         # Save the relabel mask as png
 
-        register_pixel_counts(relabeled_mask, field_id, num_classes, years[num])
+        register_pixel_counts(
+            relabeled_mask,
+            field_id,
+            years[num],
+            num_classes,
+        )
 
         # Label the amount of 0, 1, 2 labels in the label
 
