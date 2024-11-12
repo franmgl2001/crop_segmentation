@@ -275,6 +275,7 @@ def register_pixel_counts(
             writer.writerow(header)
 
         # Write the data row
+        print(len(class_counts))
         writer.writerow([field_id, year] + class_counts)
 
     print(f"Registered counts for field_id: {field_id}, year: {year}")
