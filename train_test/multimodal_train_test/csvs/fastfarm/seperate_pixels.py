@@ -28,11 +28,11 @@ train_data, test_data = train_test_split(filtered_data, test_size=0.2)
 train_paths = train_data["path"].values
 test_paths = test_data["path"].values
 
-with open("train.txt", "w") as f:
+with open("train_2.txt", "w") as f:
     for path in train_paths:
         f.write(path + "\n")
 
-with open("test.txt", "w") as f:
+with open("test_2.txt", "w") as f:
     for path in test_paths:
         f.write(path + "\n")
 
