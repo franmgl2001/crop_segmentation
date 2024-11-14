@@ -1,4 +1,4 @@
-field_id,name,latitude,longitude,year
+point_id,name,point_lat,point_long,year
 6054,64887,20.3847,-102.0311,2019
 6013,262388,20.4094,-101.6328,2019
 5958,262386,20.9383,-101.9036,2019
