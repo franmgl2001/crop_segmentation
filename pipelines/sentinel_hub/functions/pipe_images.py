@@ -28,6 +28,9 @@ config.sh_client_secret = os.getenv("CLIENT_SECRET")
 config.save()
 
 
+import csv
+import os
+
 def register_image(images, output_file="images.csv"):
     """
     Registers the image data to a CSV file.
@@ -39,26 +42,29 @@ def register_image(images, output_file="images.csv"):
     Returns:
     - None
     """
-    # Write image data to a CSV file
-    with open(output_file, "w", newline="") as file:
+    # Check if the CSV file already exists to decide whether to write a header
+    file_exists = os.path.isfile(output_file)
+    
+    # Open the file in append mode if it exists, write mode if it doesn't
+    with open(output_file, "a" if file_exists else "w", newline="") as file:
         writer = csv.writer(file)
 
-        # Write the header row
-        writer.writerow(["Image ID", "Date", "Cloud Cover"])
+        # Write the header row if the file does not already exist
+        if not file_exists:
+            writer.writerow(["Image ID", "Date", "Cloud Cover"])
 
         # Write each image's data
         for image in images:
             # Get the image ID, date, and cloud cover
             image_id = image["id"]
             image_date = image["properties"]["datetime"]
-            cloud_cover = image["properties"].get(
-                "eo:cloud_cover", "N/A"
-            )  # Get cloud cover or 'N/A' if not available
+            cloud_cover = image["properties"].get("eo:cloud_cover", "N/A")
 
             # Write the data row
             writer.writerow([image_id, image_date, cloud_cover])
 
-    print(f"Image data has been written to '{output_file}'.")
+    print(f"Image data has been {'appended to' if file_exists else 'written to'} '{output_file}'.")
+
 
 
 def process_sentinel_images(
@@ -96,4 +102,4 @@ def process_sentinel_images(
     # Download images based on the metadata
     for _, row in df.iterrows():
         print(f"Downloading image for date: {row['Date']}")
-        download_sentinel_image(config, bbox, row["Date"], point_id)
+        # download_sentinel_image(config, bbox, row["Date"], point_id)
