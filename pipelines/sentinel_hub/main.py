@@ -17,7 +17,7 @@ for index, row in csv.iterrows():
     process_sentinel_images(
         (row["point_lat"], row["point_long"]),
         f"dev_{row['point_id']}",
-        area_hectares=10,
+        area_hectares=200,
         start_date=f"{int(row['year']) -1}-11-05",
         end_date=f"{int(row['year'])}-11-05",
     )
