@@ -4,12 +4,14 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 from sentinelhub import SHConfig
 
-csv = pd.read_csv("FASTFARM/fields.csv")
+csv = pd.read_csv("FASTFARM/fields_cim_1.csv")
 
-# Start in index 6
-csv = csv.iloc[5:]
 # For loop all the rows in the csv
 for index, row in csv.iterrows():
+    print(
+        f"Processing image for point {row['point_id']} at ({row['point_lat']}, {row['point_long']})",
+        f"from {row['year'] - 1}-11-05 to {row['year']}-11-05",
+    )
     process_sentinel_images(
         (row["point_lat"], row["point_long"]),
         row["point_id"],
