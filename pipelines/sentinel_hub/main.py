@@ -9,6 +9,7 @@ csv["year"] = csv["year"].astype(int)
 
 # For loop all the rows in the csv
 for index, row in csv.iterrows():
+
     print(
         f"Processing image for point {row['point_id']} at ({row['point_lat']}, {row['point_long']})",
         f"from {row['year'] - 1}-11-05 to {row['year']}-11-05",
@@ -17,8 +18,8 @@ for index, row in csv.iterrows():
         (row["point_lat"], row["point_long"]),
         row["point_id"],
         area_hectares=10,
-        start_date=f"{row['year'] -1}-11-05",
-        end_date=f"{row['year']}-11-05",
+        start_date=f"{int(row['year']) -1}-11-05",
+        end_date=f"{int(row['year'])}-11-05",
     )
 
 
