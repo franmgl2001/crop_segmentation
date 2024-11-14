@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from sentinelhub import SHConfig
 
 csv = pd.read_csv("FASTFARM/fields_cim_1.csv")
+csv["year"] = csv["year"].astype(int)
 
 # For loop all the rows in the csv
 for index, row in csv.iterrows():
