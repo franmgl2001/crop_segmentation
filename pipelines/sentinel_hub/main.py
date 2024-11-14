@@ -7,15 +7,15 @@ from sentinelhub import SHConfig
 csv = pd.read_csv("FASTFARM/fields.csv")
 
 # Start in index 6
-csv = csv.iloc[6:]
+csv = csv.iloc[5:]
 # For loop all the rows in the csv
 for index, row in csv.iterrows():
     process_sentinel_images(
         (row["point_lat"], row["point_long"]),
         row["point_id"],
         area_hectares=10,
-        start_date="2022-11-01",
-        end_date="2024-11-05",
+        start_date=f"{row['year'] -1}-11-05",
+        end_date=f"{row['year']}-11-05",
     )
 
 
