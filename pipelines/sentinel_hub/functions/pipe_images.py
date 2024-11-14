@@ -102,4 +102,4 @@ def process_sentinel_images(
     # Download images based on the metadata
     for _, row in df.iterrows():
         print(f"Downloading image for date: {row['Date']}")
-        # download_sentinel_image(config, bbox, row["Date"], point_id)
+        download_sentinel_image(config, bbox, row["Date"], point_id)
