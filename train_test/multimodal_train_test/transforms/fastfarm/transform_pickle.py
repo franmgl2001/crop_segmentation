@@ -214,14 +214,14 @@ def relabel_crop_mask(mask, field_id, year):
     mask = mask.astype(int)
     # Relabel to the first fielduse that is not a 4
     for index, row in fielduses.iterrows():
-        if row["fielduse_crop_id"] != 4:
+        if row["crop_id"] != 4:
             print(
                 "Relabeling to ",
-                row["fielduse_crop_id"],
+                row["crop_id"],
                 "to ",
-                relabel_json[row["fielduse_crop_id"]],
+                relabel_json[row["crop_id"]],
             )
-            mask[mask == 1] = relabel_json[row["fielduse_crop_id"]]
+            mask[mask == 1] = relabel_json[row["crop_id"]]
             return mask
 
     # If no relabeling relabel to 0
