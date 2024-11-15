@@ -356,4 +356,6 @@ unique_field_ids = df["field_id"].unique()
 
 for field_id in unique_field_ids:
     main(field_id, relabel="crop")
+    if "dev" in field_id:
+        field_id += ".0"
     print(f"Finished processing field_id: {field_id}")

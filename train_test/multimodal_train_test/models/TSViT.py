@@ -191,13 +191,11 @@ class TSViT(nn.Module):
         x = self.to_patch_embedding(x)
 
         # 2. TEMPORAL ENCODING
-        print(xt)
         xt = xt.to(torch.int64)
-        print(xt)
+
         xt = F.one_hot(xt, num_classes=366).to(
             torch.float32
         )  # make into one hot encoding BxTx366
-        print(xt.shape)
         xt = xt.reshape(-1, 366)  # (B*T)x365
         temporal_pos_embedding = self.to_temporal_embedding_input(xt).reshape(
             B, T, self.dim
