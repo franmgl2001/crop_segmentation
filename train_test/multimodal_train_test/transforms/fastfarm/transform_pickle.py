@@ -191,16 +191,9 @@ def get_fielduse_count(field_id, year):
 
 def get_field_id_fielduses(field_id, year):
     fielduses = pd.read_csv("../csvs/full_fielduses.csv")
-    fields_fielduses = fielduses[fielduses["field_id"] == field_id]
-    start_date = pd.to_datetime(f"{year-1}-11-05").tz_localize(None)
-    end_date = pd.to_datetime(f"{year}-11-05").tz_localize(None)
-    fields_fielduses["prediction"] = pd.to_datetime(fields_fielduses["prediction"])
-
-    fields_fielduses = fields_fielduses[
-        (fields_fielduses["prediction"] >= start_date)
-        & (fields_fielduses["prediction"] <= end_date)
+    fields_fielduses = fielduses[
+        (fielduses["field_id"] == field_id) & (fielduses["year"] == year)
     ]
-
     return fields_fielduses
 
 
