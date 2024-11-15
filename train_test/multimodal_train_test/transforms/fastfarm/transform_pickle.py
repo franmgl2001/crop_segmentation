@@ -190,6 +190,7 @@ def get_fielduse_count(field_id, year):
 
 
 def get_field_id_fielduses(field_id, year):
+    print(field_id, year, type(field_id), type(year))
     fielduses = pd.read_csv("../csvs/full_fielduses.csv")
     fielduses["field_id"] = fielduses["field_id"].astype(str)
     fielduses["year"] = fielduses["year"].astype(int, errors="ignore")
