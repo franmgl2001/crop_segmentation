@@ -194,6 +194,7 @@ def get_field_id_fielduses(field_id, year):
     fields_fielduses = fielduses[
         (fielduses["field_id"] == field_id) & (fielduses["year"] == year)
     ]
+    print(fields_fielduses)
     return fields_fielduses
 
 
