@@ -13,7 +13,14 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 
-relabel_json = {1: 1, 2: 2, 14: 3, 17: 4}
+relabel_json = {
+    1: 1,
+    2: 2,
+    14: 3,
+    17: 4,
+    18: 5,
+    15: 6,
+}
 num_classes = 5
 
 
@@ -183,7 +190,7 @@ def get_fielduse_count(field_id, year):
 
 
 def get_field_id_fielduses(field_id, year):
-    fielduses = pd.read_csv("../csvs/fielduses.csv")
+    fielduses = pd.read_csv("../csvs/full_fielduses.csv")
     fields_fielduses = fielduses[fielduses["field_id"] == field_id]
     start_date = pd.to_datetime(f"{year-1}-11-05").tz_localize(None)
     end_date = pd.to_datetime(f"{year}-11-05").tz_localize(None)
@@ -283,7 +290,7 @@ def register_pixel_counts(
 
 
 def main(field_id, relabel="Binary", years=[2023, 2024]):
-    csv = pd.read_csv("../csvs/fields.csv")
+    csv = pd.read_csv("../csvs/full_fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
     polygon = wkt.loads(polygon_wkt)
     polygon = Polygon([(y, x) for x, y in polygon.exterior.coords])
@@ -347,7 +354,7 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
 
 
 # Read the CSV file
-df = pd.read_csv("../csvs/fields.csv")
+df = pd.read_csv("../csvs/full_fields.csv")
 unique_field_ids = df["field_id"].unique()
 
 for field_id in unique_field_ids:
