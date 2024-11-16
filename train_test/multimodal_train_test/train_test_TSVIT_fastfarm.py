@@ -200,10 +200,12 @@ def evaluate_model(
 
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/fastfarm/train_3.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
+    "csvs/fastfarm/train_3.txt",
+    "../../../datasets/FASTFARM/main_transforms/pickle_crops",
 )
 test_dataset = CustomDataset(
-    "csvs/fastfarm/test_3.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
+    "csvs/fastfarm/test_3.txt",
+    "../../../datasets/FASTFARM/main_transforms/pickle_crops",
 )
 
 num_classes = 5
