@@ -202,10 +202,12 @@ def evaluate_model(
 train_dataset = CustomDataset(
     "csvs/fastfarm/train_3.txt",
     "../../../datasets/FASTFARM/main_transforms/pickle_crops",
+    max_seq_len=MAX_SEQ_LEN,
 )
 test_dataset = CustomDataset(
     "csvs/fastfarm/test_3.txt",
     "../../../datasets/FASTFARM/main_transforms/pickle_crops",
+    max_seq_len=MAX_SEQ_LEN,
 )
 
 num_classes = 5
