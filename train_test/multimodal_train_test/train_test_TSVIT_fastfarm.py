@@ -200,13 +200,13 @@ def evaluate_model(
 
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/fastfarm/train.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
+    "csvs/fastfarm/train_3.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
 )
 test_dataset = CustomDataset(
-    "csvs/fastfarm/test.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
+    "csvs/fastfarm/test_3.txt", "../../../datasets/FASTFARM/main_transforms/pickles"
 )
 
-num_classes = 3
+num_classes = 5
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
