@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 from torch.utils.data import Dataset, DataLoader
 
+
 class CustomDataset(Dataset):
     def __init__(self, txt_file, root_dir, max_seq_len=73):
         """
@@ -11,7 +12,9 @@ class CustomDataset(Dataset):
         """
         self.root_dir = root_dir
         self.max_seq_len = max_seq_len
-        self.cut = Cut(seq_len=max_seq_len)  # Initialize Cut with the max sequence length
+        self.cut = Cut(
+            seq_len=max_seq_len
+        )  # Initialize Cut with the max sequence length
 
         # Load file paths from the text file and append the root directory
         with open(txt_file, "r") as f:
@@ -33,16 +36,21 @@ class CustomDataset(Dataset):
             data = pickle.load(f)
 
         # Extract the 'image' and 'mask' keys
-        input_data = data['image']
-        mask_data = data['mask']
+        input_data = data["image"]
+        mask_data = data["mask"]
 
+        print(f"Loaded data from {file_path}")
+        print(f"Image shape: {input_data.shape}, Mask shape: {mask_data.shape}")
         # Convert to PyTorch tensors
         input_tensor = torch.tensor(input_data, dtype=torch.float32)
         mask_tensor = torch.tensor(mask_data, dtype=torch.long)
 
-            # Apply Cut if the input length exceeds max_seq_len
+        # Apply Cut if the input length exceeds max_seq_len
         if input_tensor.shape[0] > self.max_seq_len:
-            sample = {"image": input_tensor, "doy": data.get("doy", None)}  # Include DOY if present
+            sample = {
+                "image": input_tensor,
+                "doy": data.get("doy", None),
+            }  # Include DOY if present
             sample = self.cut(sample)
             input_tensor = sample["image"]
             if sample.get("doy") is not None:
@@ -52,7 +60,7 @@ class CustomDataset(Dataset):
         input_tensor = input_tensor * 0.0001  # Adjust scaling as needed
 
         # Return the input and mask tensors
-        input_tensor = input_tensor.permute(0,2,3,1)
+        input_tensor = input_tensor.permute(0, 2, 3, 1)
 
         return input_tensor, mask_tensor
 
@@ -76,7 +84,7 @@ class Cut:
 
     def __call__(self, sample):
         image = sample["image"]
-        #doy = sample.get("doy", None)  # Get DOY if present
+        # doy = sample.get("doy", None)  # Get DOY if present
 
         total_len = image.shape[0]
 
@@ -92,8 +100,8 @@ class Cut:
         # Cut the image (and DOY if present) using the selected indices
         cut_image = image[indices]
         sample["image"] = cut_image
-        #if doy is not None:
-            #cut_doy = doy[indices]
-            #sample["doy"] = cut_doy
+        # if doy is not None:
+        # cut_doy = doy[indices]
+        # sample["doy"] = cut_doy
 
         return sample
