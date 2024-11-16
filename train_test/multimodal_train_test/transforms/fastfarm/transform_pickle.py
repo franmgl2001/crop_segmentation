@@ -350,12 +350,43 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
             )
 
 
+import concurrent.futures
+import pandas as pd
+
 # Read the CSV file
 df = pd.read_csv("../csvs/full_fields.csv")
 unique_field_ids = df["field_id"].unique()
 
-for field_id in unique_field_ids:
-    main(field_id, relabel="crop")
-    if "dev" in field_id:
-        field_id += ".0"
-    print(f"Finished processing field_id: {field_id}")
+
+def process_field(field_id):
+    """
+    Wrapper function for processing a single field_id.
+    """
+    try:
+        main(field_id, relabel="crop")
+        if "dev" in field_id:
+            field_id += ".0"
+        print(f"Finished processing field_id: {field_id}")
+    except Exception as e:
+        print(f"Error processing field_id {field_id}: {e}")
+
+
+# Run in parallel
+if __name__ == "__main__":
+    # Adjust the number of workers based on your CPU cores
+    max_workers = 4  # Example: Use 4 parallel processes
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all field_id processing tasks
+        future_to_field = {
+            executor.submit(process_field, field_id): field_id
+            for field_id in unique_field_ids
+        }
+
+        # Monitor progress
+        for future in concurrent.futures.as_completed(future_to_field):
+            field_id = future_to_field[future]
+            try:
+                future.result()
+            except Exception as exc:
+                print(f"Field_id {field_id} generated an exception: {exc}")
