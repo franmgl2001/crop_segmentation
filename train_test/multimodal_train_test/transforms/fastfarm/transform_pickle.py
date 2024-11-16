@@ -374,7 +374,7 @@ def process_field(field_id):
 # Run in parallel
 if __name__ == "__main__":
     # Adjust the number of workers based on your CPU cores
-    max_workers = 4  # Example: Use 4 parallel processes
+    max_workers = 30  # Example: Use 4 parallel processes
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         # Submit all field_id processing tasks
