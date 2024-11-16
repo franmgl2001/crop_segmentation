@@ -125,40 +125,45 @@ def are_all_masks_same(result):
 
 def separate_data_by_years(data):
     """
-    Separates the data into two lists based on yearly ranges.
+    Separates the data into a dictionary where each key is a year, representing
+    data from November 5 of the previous year to November 5 of the current year.
 
     Parameters:
     - data (list): List of dictionaries, each containing a 'time' key in ISO format.
 
     Returns:
-    - tuple: Two lists of dictionaries, one for November 2022 to November 2023 and
-             one for November 2023 to November 2024.
+    - dict: A dictionary where each key is a year (e.g., 2019) and the value is a list of
+            dictionaries containing the data for November 5 of the previous year to
+            November 5 of the current year.
     """
-    # Define the date ranges
-    start_nov_2022 = datetime(2022, 11, 5)
-    end_nov_2023 = datetime(2023, 11, 5)
-    end_nov_2024 = datetime(2024, 11, 5)
-
     # Sort the data by 'time'
     data.sort(key=lambda x: datetime.strptime(x["time"], "%Y-%m-%dT%H:%M:%SZ"))
 
-    # Filter data for each date range
-    nov_2022_to_nov_2023 = [
-        entry
-        for entry in data
-        if start_nov_2022
-        <= datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ")
-        < end_nov_2023
-    ]
-    nov_2023_to_nov_2024 = [
-        entry
-        for entry in data
-        if end_nov_2023
-        <= datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ")
-        < end_nov_2024
-    ]
+    # Extract the earliest and latest years from the data
+    times = [datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ") for entry in data]
+    earliest_year = times[0].year
+    latest_year = times[-1].year
 
-    return nov_2022_to_nov_2023, nov_2023_to_nov_2024
+    # Create a dictionary to store the separated data
+    yearly_data = {}
+
+    # Loop through each year to define the date ranges dynamically
+    for year in range(earliest_year, latest_year + 1):
+        start_date = datetime(year - 1, 11, 5)
+        end_date = datetime(year, 11, 5)
+
+        # Filter data for the current year range
+        yearly_data[year] = [
+            entry
+            for entry in data
+            if start_date
+            <= datetime.strptime(entry["time"], "%Y-%m-%dT%H:%M:%SZ")
+            < end_date
+        ]
+
+    # Remove empty entries
+    yearly_data = {year: data for year, data in yearly_data.items() if data}
+    return yearly_data
 
 
 def stack_images_by_time(data):
@@ -202,6 +207,7 @@ def get_field_id_fielduses(field_id, year):
 
 
 def relabel_mask(mask, field_id, year):
+    print("Relabeling mask")
     fielduse_count = get_fielduse_count(field_id, year)
     mask = mask.astype(int)
     mask[mask == 1] = fielduse_count
@@ -210,6 +216,7 @@ def relabel_mask(mask, field_id, year):
 
 
 def relabel_crop_mask(mask, field_id, year):
+    print("Relabeling crop mask", field_id, year)
     fielduses = get_field_id_fielduses(field_id, year)
     mask = mask.astype(int)
     # Relabel to the first fielduse that is not a 4
@@ -286,7 +293,7 @@ def register_pixel_counts(
     print(f"Registered counts for field_id: {field_id}, year: {year}")
 
 
-def main(field_id, relabel="Binary", years=[2023, 2024]):
+def main(field_id, relabel="Binary"):
     csv = pd.read_csv("../csvs/full_fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
     polygon = wkt.loads(polygon_wkt)
@@ -312,19 +319,24 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
     # Seperate the data per year
     results = separate_data_by_years(result)
 
-    for num, res in enumerate(results):
-        if len(res) == 0:
+    # print(len(results.items()), type(results), print(results.keys()))
+
+    for year in results.keys():
+        if len(results[year]) == 0:
             return
-        sits_array = stack_images_by_time(res)
+        sits_array = stack_images_by_time(results[year])
+
         if relabel == "Binary":
-            relabeled_mask = relabel_mask(res[0]["cropped_mask"], field_id, years[num])
+            relabeled_mask = relabel_mask(
+                results[year][0]["cropped_mask"], field_id, year
+            )
         else:
             relabeled_mask = relabel_crop_mask(
-                res[0]["cropped_mask"], field_id, years[num]
+                results[year][0]["cropped_mask"], field_id, year
             )
 
         # Save mask as relabeled png
-        days = create_days(res, years[num])
+        days = create_days(results[year], year)
 
         plt.imshow(relabeled_mask)
         plt.savefig("label.png")
@@ -333,13 +345,14 @@ def main(field_id, relabel="Binary", years=[2023, 2024]):
         register_pixel_counts(
             relabeled_mask,
             field_id,
-            years[num],
+            year,
             num_classes,
         )
 
         # Label the amount of 0, 1, 2 labels in the label
+        print(sits_array.shape, relabeled_mask.shape, len(days))
 
-        with open(f"pickle_crops/{field_id}_{years[num]}.pkl", "wb") as f:
+        with open(f"pickle_crops/{field_id}_{year}.pkl", "wb") as f:
             pickle.dump(
                 {
                     "image": sits_array,
@@ -364,17 +377,16 @@ def process_field(field_id):
     """
     try:
         main(field_id, relabel="crop")
-        if "dev" in field_id:
-            field_id += ".0"
         print(f"Finished processing field_id: {field_id}")
     except Exception as e:
         print(f"Error processing field_id {field_id}: {e}")
 
 
 # Run in parallel
+
 if __name__ == "__main__":
     # Adjust the number of workers based on your CPU cores
-    max_workers = 30  # Example: Use 4 parallel processes
+    max_workers = 1  # Example: Use 4 parallel processes
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         # Submit all field_id processing tasks
