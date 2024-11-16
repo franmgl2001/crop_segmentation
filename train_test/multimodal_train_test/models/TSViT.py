@@ -14,7 +14,7 @@ import torch.nn.functional as F
 from einops import rearrange, repeat
 import numpy as np
 import pytorch_lightning as pl
-from train_test.models.patch_embeddings import StandardPatchEmbedding
+from models.patch_embeddings import StandardPatchEmbedding
 
 
 class Transformer(nn.Module):
