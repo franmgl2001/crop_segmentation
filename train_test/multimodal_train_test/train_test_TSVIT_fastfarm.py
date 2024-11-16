@@ -8,7 +8,7 @@ import numpy as np
 import csv
 
 
-MAX_SEQ_LEN = 73
+MAX_SEQ_LEN = 72
 
 
 def export_results_to_csv(results, output_csv_path):
