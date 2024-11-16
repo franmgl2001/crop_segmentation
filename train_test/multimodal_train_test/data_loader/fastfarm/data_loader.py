@@ -20,8 +20,6 @@ class CustomDataset(Dataset):
         with open(txt_file, "r") as f:
             self.data_paths = [os.path.join(root_dir, line.strip()) for line in f]
 
-        print(f"Loaded {len(self.data_paths)} files from {txt_file}")
-
     def __len__(self):
         return len(self.data_paths)
 
