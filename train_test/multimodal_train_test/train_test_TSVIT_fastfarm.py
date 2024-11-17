@@ -200,12 +200,12 @@ def evaluate_model(
 
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/fastfarm/train_3.txt",
+    "csvs/fastfarm/train_4.txt",
     "../../../datasets/FASTFARM/main_transforms/pickle_crops",
     max_seq_len=MAX_SEQ_LEN,
 )
 test_dataset = CustomDataset(
-    "csvs/fastfarm/test_3.txt",
+    "csvs/fastfarm/test_4.txt",
     "../../../datasets/FASTFARM/main_transforms/pickle_crops",
     max_seq_len=MAX_SEQ_LEN,
 )
