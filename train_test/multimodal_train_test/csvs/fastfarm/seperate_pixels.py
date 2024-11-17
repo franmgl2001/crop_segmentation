@@ -41,10 +41,10 @@ test_pixel_counts_per_class.to_csv("test_pixel_counts_per_class.csv", header=Tru
 train_paths = train_data["path"].values
 test_paths = test_data["path"].values
 
-with open("train_3.txt", "w") as f:
+with open("train_4.txt", "w") as f:
     for path in train_paths:
         f.write(path + "\n")
 
-with open("test_3.txt", "w") as f:
+with open("test_4.txt", "w") as f:
     for path in test_paths:
         f.write(path + "\n")
