@@ -6,10 +6,11 @@ file_path = "pixel_counts.csv"
 data = pd.read_csv(file_path)
 
 # Filter columns with names from '1' to '2000' (assumed to be pixel classes)
-pixel_columns = [col for col in data.columns if col.isdigit() and 1 <= int(col) <= 2000]
+pixel_columns = [col for col in data.columns if col.isdigit() and 1 <= int(col) <= 2]
 
 # Filter out rows where all pixel values are zero
 filtered_data = data[data[pixel_columns].sum(axis=1) > 0]
+
 
 # Add a 'path' column for file paths
 filtered_data["path"] = (
