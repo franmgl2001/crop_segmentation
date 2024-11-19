@@ -14,12 +14,21 @@ import matplotlib.pyplot as plt
 
 
 relabel_json = {
-    1: 1,
-    2: 2,
-    14: 3,
-    17: 4,
+    14: 1,
+    17: 2,
+    1: 3,
+    2: 4,
     18: 5,
     15: 6,
+}
+
+
+class_names = {
+    0: "Background",
+    1: "Barley",
+    2: "Wheat",
+    3: "Sorhgum",
+    4: "Maize",
 }
 num_classes = 5
 
