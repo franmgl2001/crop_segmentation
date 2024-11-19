@@ -163,6 +163,7 @@ class CutWithDoyRange:
         # Filter indices based on DOY range if provided
         if doy is not None and self.doy_range:
             min_doy, max_doy = self.doy_range
+            print(f"Filtering DOY values between {min_doy} and {max_doy}...", doy)
             valid_indices = (doy >= min_doy) & (doy <= max_doy)
             valid_indices = torch.where(valid_indices)[0]
 
