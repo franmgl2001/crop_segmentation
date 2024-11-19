@@ -8,7 +8,7 @@ import numpy as np
 import csv
 
 
-MAX_SEQ_LEN = 72
+MAX_SEQ_LEN = 36
 
 
 def export_results_to_csv(results, output_csv_path):
@@ -203,11 +203,13 @@ train_dataset = CustomDataset(
     "csvs/fastfarm/train_4.txt",
     "../../../datasets/FASTFARM/main_transforms/pickle_crops",
     max_seq_len=MAX_SEQ_LEN,
+    doy_range=(0, 183),
 )
 test_dataset = CustomDataset(
     "csvs/fastfarm/test_4.txt",
     "../../../datasets/FASTFARM/main_transforms/pickle_crops",
     max_seq_len=MAX_SEQ_LEN,
+    doy_range=(0, 183),
 )
 
 num_classes = 5
