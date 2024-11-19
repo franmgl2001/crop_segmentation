@@ -152,6 +152,12 @@ class CutWithDoyRange:
         image = sample["image"]
         doy = sample.get("doy", None)  # Get DOY if present
 
+        # Ensure image and doy arrays are torch tensors
+        if not isinstance(image, torch.Tensor):
+            image = torch.tensor(image)
+        if doy is not None and not isinstance(doy, torch.Tensor):
+            doy = torch.tensor(doy)
+
         total_len = image.shape[0]
 
         # Ensure the requested seq_len does not exceed available length
@@ -185,4 +191,7 @@ class CutWithDoyRange:
         if doy is not None:
             sample["doy"] = doy[selected_indices]
 
+        print(
+            f"Cut image shape: {sample['image'].shape}, Cut DOY shape: {len(sample.get('doy', None))}"
+        )
         return sample
