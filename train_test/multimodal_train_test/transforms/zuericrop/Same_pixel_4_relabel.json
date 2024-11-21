@@ -169,20 +169,13 @@
     {
         "relabel": 7,
         "GT_list": [
-            21
-        ],
-        "pixel_sum": 547651
-    },
-    {
-        "relabel": 8,
-        "GT_list": [
             34,
             35
         ],
         "pixel_sum": 547651
     },
     {
-        "relabel": 9,
+        "relabel": 8,
         "GT_list": [
             18,
             19
@@ -190,7 +183,7 @@
         "pixel_sum": 547651
     },
     {
-        "relabel": 10,
+        "relabel": 9,
         "GT_list": [
             23
         ],
