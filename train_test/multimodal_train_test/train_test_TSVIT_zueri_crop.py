@@ -192,10 +192,10 @@ def evaluate_model(
 
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/train_zuericrop_8.txt", "../../datasets/zuericrop/dataset"
+    "csvs/train_zuericrop_10.txt", "../../../datasets/zuericrop/dataset"
 )
 test_dataset = CustomDataset(
-    "csvs/test_zuericrop_8.txt", "../../datasets/zuericrop/dataset"
+    "csvs/test_zuericrop_10.txt", "../../../datasets/zuericrop/dataset"
 )
 
 num_classes = 11
