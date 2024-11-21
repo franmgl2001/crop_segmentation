@@ -38,9 +38,7 @@ class CustomDataset(Dataset):
 
             # Convert to PyTorch tensors
             image_tensor = torch.tensor(image, dtype=torch.float32)
-            print(image_tensor.shape)
             image_tensor = image_tensor[1::2]
-            print(image_tensor.shape)
             label_tensor = torch.tensor(label, dtype=torch.long)
 
             # Apply rescaling to the image tensor
