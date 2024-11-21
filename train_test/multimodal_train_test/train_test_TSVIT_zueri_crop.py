@@ -7,6 +7,7 @@ from data_loader.numpy_dataloader_zuericop import CustomDataset
 import numpy as np
 import os
 import csv
+from tqdm import tqdm
 
 
 def export_results_to_csv(results, output_csv_path):
@@ -20,43 +21,48 @@ def export_results_to_csv(results, output_csv_path):
 
 
 # Simplified Training Loop
+
+
 def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
     model.train()
     iteration = 0
     for epoch in range(num_epochs):
         running_loss = 0.0
-        for inputs, labels in train_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            iteration += 1
+        print(f"Epoch [{epoch + 1}/{num_epochs}]")
 
-            B, T, H, W, C = inputs.shape
-            # Add channel that contains time steps
-            time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
-            time_channel = (
-                time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
-            )  # BxTxHxW
+        # Add progress bar for the DataLoader
+        with tqdm(total=len(train_loader), desc=f"Training Epoch {epoch + 1}") as pbar:
+            for inputs, labels in train_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                iteration += 1
 
-            inputs = torch.cat(
-                (inputs, time_channel[:, :, :, :, None]), dim=4
-            )  # Add time channel
-            inputs = inputs.permute(0, 1, 4, 2, 3)
+                B, T, H, W, C = inputs.shape
+                # Add channel that contains time steps
+                time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
+                time_channel = (
+                    time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
+                )  # BxTxHxW
 
-            # Zero the parameter gradients
-            optimizer.zero_grad()
+                inputs = torch.cat(
+                    (inputs, time_channel[:, :, :, :, None]), dim=4
+                )  # Add time channel
+                inputs = inputs.permute(0, 1, 4, 2, 3)
 
-            # Forward + backward + optimize
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+                # Zero the parameter gradients
+                optimizer.zero_grad()
 
-            # Print statistics
-            running_loss += loss.item()
+                # Forward + backward + optimize
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
 
-            print(
-                f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}",
-                end="\r",
-            )
+                # Update running loss
+                running_loss += loss.item()
+                pbar.update(1)  # Update the progress bar
+
+            # Update description with loss information
+            pbar.set_postfix(loss=running_loss / len(train_loader))
 
         print(
             f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}"
