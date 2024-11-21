@@ -31,7 +31,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
 
             B, T, H, W, C = inputs.shape
             # Add channel that contains time steps
-            time_points = torch.linspace(0, 364, steps=142).to(device)
+            time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
             time_channel = (
                 time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
             )  # BxTxHxW
@@ -111,7 +111,7 @@ def evaluate_model(
                 print(inputs.shape, labels.shape)
 
                 B, T, H, W, C = inputs.shape
-                time_points = torch.linspace(0, 364, steps=142).to(device)
+                time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
                 time_channel = (
                     time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
                 )
@@ -199,7 +199,7 @@ test_dataset = CustomDataset(
 )
 
 num_classes = 11
-
+MAX_SEQ_LEN = 71
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
@@ -230,7 +230,7 @@ model = TSViT(
     img_res=24,
     num_channels=[9],
     num_classes=num_classes,
-    max_seq_len=142,
+    max_seq_len=MAX_SEQ_LEN,
     patch_embedding="Channel Encoding",
 )
 print("Done creating model")
