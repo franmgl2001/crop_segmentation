@@ -198,13 +198,13 @@ def evaluate_model(
 
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/train_zuericrop_10.txt", "../../../datasets/zuericrop/dataset"
+    "csvs/train_zuericrop_11.txt", "../../../datasets/zuericrop/dataset"
 )
 test_dataset = CustomDataset(
-    "csvs/test_zuericrop_10.txt", "../../../datasets/zuericrop/dataset"
+    "csvs/test_zuericrop_11.txt", "../../../datasets/zuericrop/dataset"
 )
 
-num_classes = 11
+num_classes = 10
 MAX_SEQ_LEN = 71
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
