@@ -19,6 +19,37 @@ from models.TSViT import TSViT
 import gc  # Import garbage collection module
 
 
+class_names_ff = {
+    0: "Background",
+    1: "Sorhgum",
+    2: "Maize",
+    3: "Barley",
+    4: "Wheat",
+}
+
+class_names_zuericrop = {
+    0: "Background",
+}
+
+# Current band order in the input tensor
+input_order = [
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B8A",
+    "B11",
+    "B12",
+    "SCL",
+]
+
+# Desired band order
+target_order = ["B08", "B03", "B02", "B04", "B05", "B06", "B07", "B11", "B12"]
+
+
 def zero_pad_time(tensor, start_time, end_time):
     """
     Sets values to zero for a specified range of time steps within the tensor.
@@ -31,17 +62,32 @@ def zero_pad_time(tensor, start_time, end_time):
     Returns:
     torch.Tensor: A tensor with values set to zero for the specified time steps.
     """
-    print(tensor.shape, start_time, end_time)
+    print(
+        f"Tensor shape: {tensor.shape}, Start time: {start_time}, End time: {end_time}"
+    )
+
+    # Ensure tensor dimensions match the expected shape
+    if len(tensor.shape) != 4:
+        raise ValueError("Input tensor must have shape (T, B, H, W).")
+
     T, B, H, W = tensor.shape
-    if start_time < 0 or end_time >= T or start_time > end_time:
+
+    # Validate start_time and end_time
+    if start_time < 0 or start_time > end_time:
         raise ValueError("Invalid start_time or end_time range.")
 
+    # Create a clone of the tensor to avoid in-place modification
     padded_tensor = tensor.clone()
-    padded_tensor[start_time : end_time + 1, :, :, :] = 0
+
+    # Apply zero padding outside the specified time window
+    padded_tensor[:start_time, :, :, :] = 0  # Zero-pad before the start_time
+    if end_time < T - 1:
+        padded_tensor[end_time + 1 :, :, :, :] = 0  # Zero-pad after the end_time
+
     return padded_tensor
 
 
-def get_masked_probabilities(tensor, mask, num_classes=3, value=2):
+def get_masked_probabilities(tensor, mask, num_classes=3, value=0):
     """
     Computes the mean probabilities for each class in the masked regions.
 
@@ -49,12 +95,12 @@ def get_masked_probabilities(tensor, mask, num_classes=3, value=2):
     tensor (torch.Tensor): A tensor of shape (C, H, W) with class probabilities.
     mask (torch.Tensor): A tensor of shape (H, W) with the mask values.
     num_classes (int): The number of classes.
-    value (int): The value in the mask to use for selecting regions.
+    value (int): The value that is not being masked.
 
     Returns:
     torch.Tensor: A tensor of mean probabilities per class in the masked regions.
     """
-    mask = mask == value  # Create a boolean mask
+    mask = mask != value  # Create a boolean mask
     masked_means = []
 
     # Calculate mean probabilities for each class in the masked region
@@ -72,13 +118,14 @@ def get_masked_probabilities(tensor, mask, num_classes=3, value=2):
 
 
 # Load the pickle file
-with open("3226_2023.pkl", "rb") as f:
+with open("dev_5943_2019.pkl", "rb") as f:
     data = pickle.load(f)
 
 # Model configuration and initialization
-num_classes = 2
-MAX_SEQ_LEN = 73
+num_classes = 11
+MAX_SEQ_LEN = 71
 patch_size = 2
+window_size = 40
 
 config = {
     "patch_size": patch_size,
@@ -99,33 +146,45 @@ config = {
 model = TSViT(
     config,
     img_res=24,
-    num_channels=[10],
-    num_classes=3,
+    num_channels=[9],
+    num_classes=num_classes,
     max_seq_len=MAX_SEQ_LEN,
     patch_embedding="Channel Encoding",
 )
 
 # Load the model weights
 model.load_state_dict(
-    torch.load("../models/binary_window.pth", map_location=torch.device("cpu"))
+    torch.load("../models/zuericrop10.pth", map_location=torch.device("cpu"))
 )
 model.eval()  # Set model to evaluation mode
 
 # Placeholder for average probabilities
 average_probabilities = []
 
+
+padding_steps = list(
+    range(window_size, MAX_SEQ_LEN, 5)
+)  # Adjusted to step size used in the loop
 # Loop through each padding level and calculate average probability
-for padding_step in range(0, MAX_SEQ_LEN, 5):
-    print(f"Padding Step: {padding_step}")
+for padding_step in padding_steps:
+    # Remove the
     input_data = np.array(data["image"], dtype=np.float32)
     mask_data = data["mask"]
 
+    # Get indices of the target order from the current order
+    indices = [input_order.index(band) for band in target_order]
+
+    # Reorder tensor channels
+    input_data = input_data[:, indices, :, :]
+
     # Convert to PyTorch tensors
     input_tensor = torch.tensor(input_data, dtype=torch.float32) * 0.0001
+    # Cut the input tensor
+    input_tensor = input_tensor[:MAX_SEQ_LEN]
     input_tensor = input_tensor.permute(0, 2, 3, 1)  # Reshape to (T, H, W, C)
 
     padded_tensor = zero_pad_time(
-        input_tensor, 0, padding_step
+        input_tensor, padding_step - window_size, padding_step
     )  # Add batch dimension (1, T, H, W, C)
 
     # Add the batch dimension
@@ -143,24 +202,44 @@ for padding_step in range(0, MAX_SEQ_LEN, 5):
 
     # Get the masked probabilities
     average_probabilities.append(
-        get_masked_probabilities(probabilities, mask_data, value=2)
+        get_masked_probabilities(
+            probabilities, mask_data, value=2, num_classes=num_classes
+        )
     )
-    print(average_probabilities[1])
+    print(average_probabilities[-1])
     # Delete variables to free memory
     del input_tensor, padded_tensor, time_channel, inputs, output, probabilities
     gc.collect()  # Run garbage collection
 
 # Class one probabilities
-class_one_probabilities = [p[1].item() for p in average_probabilities]
-class_two_probabilities = [p[2].item() for p in average_probabilities]
-
-
-# Plot the average probabilities for class one, and class two
+# Plot the average probabilities for all classes
 plt.figure(figsize=(12, 6))
-plt.plot(range(0, MAX_SEQ_LEN, 5), class_one_probabilities, label="Single label")
-plt.plot(range(0, MAX_SEQ_LEN, 5), class_two_probabilities, label="Multi label")
+
+# Transpose `average_probabilities` for easier plotting (class-wise separation)
+average_probabilities_transposed = list(zip(*average_probabilities))
+
+# Iterate through classes (ignoring Background if needed)
+for class_idx in range(1, num_classes):  # Skipping class 0 (Background)
+    print(class_idx)
+    if class_idx - 1 < len(average_probabilities_transposed):  # Avoid index errors
+        print(class_idx)
+        # Detach tensor and convert to numpy for plotting
+        class_probabilities = [
+            prob.detach().numpy() if isinstance(prob, torch.Tensor) else prob
+            for prob in average_probabilities_transposed[class_idx - 1]
+        ]
+        plt.plot(
+            padding_steps,
+            class_probabilities,  # Class-wise averages
+            label=class_idx,
+        )
+
 plt.xlabel("Padding Steps")
-plt.legend()
 plt.ylabel("Average Probability")
-plt.title("Average Probabilities for Class 1 and Class 2")
-plt.savefig("average_probabilities_3226.png")
+plt.title("Average Probabilities for Crop Classes as Padding Increases")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+
+# Save and show the plot
+plt.savefig("plots/average_probabilities_cros_window.png")
