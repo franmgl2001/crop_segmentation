@@ -362,7 +362,7 @@ def main(field_id, dates, relabel="Binary"):
         # Label the amount of 0, 1, 2 labels in the label
         print(sits_array.shape, relabeled_mask.shape, len(days))
 
-        with open(f"pickle_crops/{field_id}_{year}.pkl", "wb") as f:
+        with open(f"pickle_crops_yearly/{field_id}_{year}.pkl", "wb") as f:
             pickle.dump(
                 {
                     "image": sits_array,
