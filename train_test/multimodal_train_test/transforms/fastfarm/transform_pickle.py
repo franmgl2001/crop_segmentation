@@ -360,6 +360,11 @@ def main(field_id, dates, relabel="Binary"):
         )
 
         # Label the amount of 0, 1, 2 labels in the label
+
+        # If the directory does not exist, create it
+        if not os.path.exists("pickle_crops_yearly"):
+            os.makedirs("pickle_crops_yearly")
+
         print(sits_array.shape, relabeled_mask.shape, len(days))
 
         with open(f"pickle_crops_yearly/{field_id}_{year}.pkl", "wb") as f:
