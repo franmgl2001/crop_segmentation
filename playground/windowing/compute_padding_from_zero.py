@@ -107,7 +107,7 @@ with open("dev_5943_2019.pkl", "rb") as f:
     data = pickle.load(f)
 
 # Model configuration and initialization
-num_classes = 11
+num_classes = 10
 MAX_SEQ_LEN = 71
 patch_size = 2
 
@@ -138,7 +138,7 @@ model = TSViT(
 
 # Load the model weights
 model.load_state_dict(
-    torch.load("../models/zuericrop10.pth", map_location=torch.device("cpu"))
+    torch.load("../models/zuericrop11.pth", map_location=torch.device("cpu"))
 )
 model.eval()  # Set model to evaluation mode
 
