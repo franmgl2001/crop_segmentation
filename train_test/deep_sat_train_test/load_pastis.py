@@ -25,7 +25,7 @@ model_config ={
 model = TSViTcls(model_config)
 
 model.load_state_dict(
-    torch.load("../models/best.pth", map_location=torch.device("cpu"))
+    torch.load("best.pth", map_location=torch.device("cpu"))
 )
 
 
