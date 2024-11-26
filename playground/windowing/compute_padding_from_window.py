@@ -127,119 +127,141 @@ MAX_SEQ_LEN = 71
 patch_size = 2
 window_size = 40
 
+    # Model configuration and initialization
+num_classes = 10
 config = {
-    "patch_size": patch_size,
-    "patch_size_time": 1,
-    "patch_time": 4,
-    "dim": 128,
-    "temporal_depth": 6,
-    "spatial_depth": 2,
-    "channel_depth": 4,
-    "heads": 4,
-    "dim_head": 64,
-    "dropout": 0.0,
-    "emb_dropout": 0.0,
-    "scale_dim": 4,
-    "depth": 4,
-}
+        "patch_size": 2,
+        "patch_size_time": 1,
+        "patch_time": 4,
+        "dim": 128,
+        "temporal_depth": 6,
+        "spatial_depth": 2,
+        "channel_depth": 4,
+        "heads": 4,
+        "dim_head": 64,
+        "dropout": 0.0,
+        "emb_dropout": 0.0,
+        "scale_dim": 4,
+        "depth": 4,
+    }
 
 model = TSViT(
-    config,
-    img_res=24,
-    num_channels=[9],
-    num_classes=num_classes,
-    max_seq_len=MAX_SEQ_LEN,
-    patch_embedding="Channel Encoding",
-)
-
-# Load the model weights
-model.load_state_dict(
-    torch.load("../models/zuericrop11.pth", map_location=torch.device("cpu"))
-)
-model.eval()  # Set model to evaluation mode
-
-# Placeholder for average probabilities
-average_probabilities = []
-
-
-padding_steps = list(
-    range(window_size, MAX_SEQ_LEN, 5)
-)  # Adjusted to step size used in the loop
-# Loop through each padding level and calculate average probability
-for padding_step in padding_steps:
-    # Remove the
-    input_data = np.array(data["image"], dtype=np.float32)
-    mask_data = data["mask"]
-
-    # Get indices of the target order from the current order
-    indices = [input_order.index(band) for band in target_order]
-
-    # Reorder tensor channels
-    input_data = input_data[:, indices, :, :]
-
-    # Convert to PyTorch tensors
-    input_tensor = torch.tensor(input_data, dtype=torch.float32) * 0.0001
-    # Cut the input tensor
-    input_tensor = input_tensor[:MAX_SEQ_LEN]
-    input_tensor = input_tensor.permute(0, 2, 3, 1)  # Reshape to (T, H, W, C)
-
-    padded_tensor = zero_pad_time(
-        input_tensor, padding_step - window_size, padding_step
-    )  # Add batch dimension (1, T, H, W, C)
-
-    # Add the batch dimension
-    padded_tensor = padded_tensor.unsqueeze(0)
-    # Prepare inputs with time channel
-    B, T, H, W, C = padded_tensor.shape
-    time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN)
-    time_channel = time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2)
-    inputs = torch.cat((padded_tensor, time_channel[:, :, :, :, None]), dim=4)
-    inputs = inputs.permute(0, 1, 4, 2, 3)
-
-    # Run the model and get the probabilities
-    output = model(inputs)
-    probabilities = torch.softmax(output, dim=1)
-
-    # Get the masked probabilities
-    average_probabilities.append(
-        get_masked_probabilities(
-            probabilities, mask_data, value=2, num_classes=num_classes
-        )
+        config,
+        img_res=24,
+        num_channels=[9],
+        num_classes=num_classes,
+        max_seq_len=MAX_SEQ_LEN,
+        patch_embedding="Channel Encoding",
     )
-    print(average_probabilities[-1])
-    # Delete variables to free memory
-    del input_tensor, padded_tensor, time_channel, inputs, output, probabilities
-    gc.collect()  # Run garbage collection
 
-# Class one probabilities
-# Plot the average probabilities for all classes
-plt.figure(figsize=(12, 6))
 
-# Transpose `average_probabilities` for easier plotting (class-wise separation)
-average_probabilities_transposed = list(zip(*average_probabilities))
 
-# Iterate through classes (ignoring Background if needed)
-for class_idx in range(1, num_classes):  # Skipping class 0 (Background)
-    print(class_idx)
-    if class_idx - 1 < len(average_probabilities_transposed):  # Avoid index errors
-        print(class_idx)
-        # Detach tensor and convert to numpy for plotting
-        class_probabilities = [
-            prob.detach().numpy() if isinstance(prob, torch.Tensor) else prob
-            for prob in average_probabilities_transposed[class_idx - 1]
-        ]
-        plt.plot(
-            [step - window_size for step in padding_steps],  # X-axis values
-            class_probabilities,  # Class-wise averages
-            label=class_idx,
+def main(pickle_file, model_path, output_plot, max_seq_len=71, window_size=40):
+    """
+    Main function to process .pkl files, test the windowing technique, 
+    and plot the average probabilities.
+
+    Parameters:
+    - pickle_file (str): Path to the .pkl file.
+    - model_path (str): Path to the pre-trained TSViT model.
+    - output_plot (str): Path to save the output plot.
+    - max_seq_len (int): Maximum sequence length. Default is 71.
+    - window_size (int): Window size for padding. Default is 40.
+    """
+    # Load the pickle file
+    with open(pickle_file, "rb") as f:
+        data = pickle.load(f)
+
+
+
+    # Load the model weights
+    model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
+    model.eval()  # Set model to evaluation mode
+
+    # Placeholder for average probabilities
+    average_probabilities = []
+
+    # Adjusted padding steps
+    padding_steps = list(range(window_size, max_seq_len, 5))
+
+    # Loop through padding steps
+    for padding_step in padding_steps:
+        input_data = np.array(data["image"], dtype=np.float32)
+        mask_data = data["mask"]
+
+        # Reorder tensor channels to match the target order
+        indices = [input_order.index(band) for band in target_order]
+        input_data = input_data[:, indices, :, :]
+
+        # Convert to PyTorch tensors
+        input_tensor = torch.tensor(input_data, dtype=torch.float32) * 0.0001
+        input_tensor = input_tensor[:max_seq_len].permute(0, 2, 3, 1)
+
+        # Zero-pad the tensor
+        padded_tensor = zero_pad_time(input_tensor, padding_step - window_size, padding_step)
+        padded_tensor = padded_tensor.unsqueeze(0)
+
+        # Add time channel
+        B, T, H, W, C = padded_tensor.shape
+        time_points = torch.linspace(0, 364, steps=max_seq_len)
+        time_channel = time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2)
+        inputs = torch.cat((padded_tensor, time_channel[:, :, :, :, None]), dim=4)
+        inputs = inputs.permute(0, 1, 4, 2, 3)
+
+        # Run the model
+        output = model(inputs)
+        probabilities = torch.softmax(output, dim=1)
+
+        # Compute masked probabilities
+        average_probabilities.append(
+            get_masked_probabilities(probabilities, mask_data, value=2, num_classes=num_classes)
         )
 
-plt.xlabel("Padding Steps")
-plt.ylabel("Average Probability")
-plt.title("Average Probabilities for Crop Classes as Padding Increases")
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
+        # Free memory
+        del input_tensor, padded_tensor, time_channel, inputs, output, probabilities
+        gc.collect()
 
-# Save and show the plot
-plt.savefig("plots/average_probabilities_cros_window.png")
+    # Plot average probabilities
+    plot_probabilities(
+        average_probabilities, padding_steps, window_size, output_plot, num_classes
+    )
+
+
+def plot_probabilities(average_probabilities, padding_steps, window_size, output_plot, num_classes):
+    """
+    Plots the average probabilities for each class as padding increases.
+
+    Parameters:
+    - average_probabilities (list): List of average probabilities for each class.
+    - padding_steps (list): List of padding steps.
+    - window_size (int): Window size used in padding.
+    - output_plot (str): Path to save the output plot.
+    - num_classes (int): Number of classes.
+    """
+    plt.figure(figsize=(12, 6))
+    average_probabilities_transposed = list(zip(*average_probabilities))
+
+    for class_idx in range(1, num_classes):
+        if class_idx - 1 < len(average_probabilities_transposed):
+            class_probabilities = [
+                prob.detach().numpy() if isinstance(prob, torch.Tensor) else prob
+                for prob in average_probabilities_transposed[class_idx - 1]
+            ]
+            plt.plot(
+                [step - window_size for step in padding_steps],
+                class_probabilities,
+                label=f"Class {class_idx}",
+            )
+
+    plt.xlabel("Padding Steps")
+    plt.ylabel("Average Probability")
+    plt.title("Average Probabilities for Crop Classes as Padding Increases")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(output_plot)
+
+
+# Run the main function
+if __name__ == "__main__":
+    main("dev_5943_2019.pkl", "../models/zuericrop11.pth", "plots/average_probabilities_cros_window.png")
