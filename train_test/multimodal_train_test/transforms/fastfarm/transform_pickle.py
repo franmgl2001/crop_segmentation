@@ -383,7 +383,7 @@ unique_field_ids = df["field_id"].unique()
 dates = {"start_day": 1, "start_month": 1, "end_day": 31, "end_month": 12}
 
 
-def process_field(field_id):
+def process_field(field_id, dates):
     """
     Wrapper function for processing a single field_id.
     """
