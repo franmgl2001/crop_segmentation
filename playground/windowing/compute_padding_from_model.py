@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
+from pathlib import Path
+
 # Add the 'playground' directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -220,6 +222,25 @@ def main(pickle_file, model_path, output_plot, max_seq_len=71, window_size=40):
     # Free memory
     del input_tensor, time_channel, inputs, output, probabilities
     gc.collect()
+
+def get_all_pkl_files(root_folder):
+    """
+    Get all .pkl files from the specified root folder, including subdirectories.
+
+    Parameters:
+        root_folder (str): The root folder to search for .pkl files.
+
+    Returns:
+        list: A list of file paths to all .pkl files found.
+    """
+    root_path = Path(root_folder)
+    if not root_path.is_dir():
+        raise ValueError(f"The specified path '{root_folder}' is not a valid directory.")
+    
+    # Collect all .pkl files from the root folder and subdirectories
+    pkl_files = [str(file) for file in root_path.rglob('*.pkl')]
+    
+    return pkl_files
 
 
 # Run the main function
