@@ -132,13 +132,14 @@ def are_all_masks_same(result):
     return all(np.array_equal(entry["cropped_mask"], first_mask) for entry in result)
 
 
-def separate_data_by_years(data):
+def separate_data_by_years(data, dates):
     """
     Separates the data into a dictionary where each key is a year, representing
     data from November 5 of the previous year to November 5 of the current year.
 
     Parameters:
     - data (list): List of dictionaries, each containing a 'time' key in ISO format.
+    - dates (dict): Dictionary containing the start and end dates for the data range.
 
     Returns:
     - dict: A dictionary where each key is a year (e.g., 2019) and the value is a list of
@@ -158,8 +159,8 @@ def separate_data_by_years(data):
 
     # Loop through each year to define the date ranges dynamically
     for year in range(earliest_year, latest_year + 1):
-        start_date = datetime(year - 1, 11, 5)
-        end_date = datetime(year, 11, 5)
+        start_date = datetime(year - 1, dates["start_month"], dates["start_day"])
+        end_date = datetime(year, dates["end_month"], dates["end_day"])
 
         # Filter data for the current year range
         yearly_data[year] = [
@@ -302,7 +303,7 @@ def register_pixel_counts(
     print(f"Registered counts for field_id: {field_id}, year: {year}")
 
 
-def main(field_id, relabel="Binary"):
+def main(field_id, dates, relabel="Binary"):
     csv = pd.read_csv("../csvs/full_fields.csv")
     polygon_wkt = csv[csv["field_id"] == field_id]["polygon"].values[0]
     polygon = wkt.loads(polygon_wkt)
@@ -326,7 +327,7 @@ def main(field_id, relabel="Binary"):
         )
 
     # Seperate the data per year
-    results = separate_data_by_years(result)
+    results = separate_data_by_years(result, dates)
 
     # print(len(results.items()), type(results), print(results.keys()))
 
@@ -379,13 +380,15 @@ import pandas as pd
 df = pd.read_csv("../csvs/full_fields.csv")
 unique_field_ids = df["field_id"].unique()
 
+dates = {"start_day": 1, "start_month": 1, "end_day": 31, "end_month": 12}
+
 
 def process_field(field_id):
     """
     Wrapper function for processing a single field_id.
     """
     try:
-        main(field_id, relabel="crop")
+        main(field_id, dates, relabel="crop")
         print(f"Finished processing field_id: {field_id}")
     except Exception as e:
         print(f"Error processing field_id {field_id}: {e}")
@@ -400,7 +403,7 @@ if __name__ == "__main__":
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         # Submit all field_id processing tasks
         future_to_field = {
-            executor.submit(process_field, field_id): field_id
+            executor.submit(process_field, field_id, dates): field_id
             for field_id in unique_field_ids
         }
 
