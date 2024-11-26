@@ -23,50 +23,79 @@ def export_results_to_csv(results, output_csv_path):
 # Simplified Training Loop
 
 
-def train_model(model, train_loader, criterion, optimizer, num_epochs=50):
-    model.train()
-    iteration = 0
+
+def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=50):
+    model.train()  # Set model to training mode
+
     for epoch in range(num_epochs):
-        running_loss = 0.0
+        running_train_loss = 0.0
         print(f"Epoch [{epoch + 1}/{num_epochs}]")
 
-        # Add progress bar for the DataLoader
+        # Training Loop
         with tqdm(total=len(train_loader), desc=f"Training Epoch {epoch + 1}") as pbar:
             for inputs, labels in train_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
-                iteration += 1
 
                 B, T, H, W, C = inputs.shape
-                # Add channel that contains time steps
+
+                # Add time channel
                 time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
                 time_channel = (
                     time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
-                )  # BxTxHxW
-
-                inputs = torch.cat(
-                    (inputs, time_channel[:, :, :, :, None]), dim=4
-                )  # Add time channel
+                )
+                inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
                 inputs = inputs.permute(0, 1, 4, 2, 3)
 
-                # Zero the parameter gradients
-                optimizer.zero_grad()
+                optimizer.zero_grad()  # Zero the gradients
 
-                # Forward + backward + optimize
+                # Forward pass
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
+
+                # Backward pass and optimization
                 loss.backward()
                 optimizer.step()
 
                 # Update running loss
-                running_loss += loss.item()
-                pbar.update(1)  # Update the progress bar
+                running_train_loss += loss.item()
+                pbar.update(1)
 
-            # Update description with loss information
-            pbar.set_postfix(loss=running_loss / len(train_loader))
+            # Update progress bar description
+            train_loss = running_train_loss / len(train_loader)
+            pbar.set_postfix(train_loss=train_loss)
 
+        # Validation Loop
+        model.eval()  # Set model to evaluation mode
+        running_val_loss = 0.0
+
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+
+                B, T, H, W, C = inputs.shape
+
+                # Add time channel
+                time_points = torch.linspace(0, 364, steps=MAX_SEQ_LEN).to(device)
+                time_channel = (
+                    time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
+                )
+                inputs = torch.cat((inputs, time_channel[:, :, :, None]), dim=4)
+                inputs = inputs.permute(0, 1, 4, 2, 3)
+
+                # Forward pass
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+
+                # Accumulate validation loss
+                running_val_loss += loss.item()
+
+        val_loss = running_val_loss / len(val_loader)
         print(
-            f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}"
+            f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}"
         )
+
+        model.train()  # Switch back to training mode after validation
+
     print("Finished Training")
 
 
@@ -104,7 +133,7 @@ def evaluate_model(
     # To store predictions and labels for MIoU and mean accuracy
     all_preds = []
     all_labels = []
-
+    
     # Open CSV file to log predictions and labels
     with open(csv_filename, mode="w", newline="") as file:
         writer = csv.writer(file)
@@ -191,7 +220,8 @@ def evaluate_model(
     for i in range(num_classes):
         print(f"Class {i}: Accuracy = {class_accuracies[i]:.2f}%, MIoU = {ious[i]:.4f}")
 
-    export_results_to_csv(results, "results_5.csv")
+    if csv_filename:
+        export_results_to_csv(results, "results_5.csv")
 
     model.train()  # Switch back to training mode
 
@@ -251,10 +281,10 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 model.to(device)
 
 # Train the Model
-train_model(model, train_loader, criterion, optimizer)
+train_model(model, train_loader, test_loader, criterion, optimizer)
 
 # Evaluate the Model on Test Set
-evaluate_model(model, test_loader, criterion, num_classes)
+evaluate_model(model, test_loader, criterion, num_classes, file_name="predictions.csv")
 
 # Save the Model
 torch.save(model.state_dict(), "tsvit_model.pth")
