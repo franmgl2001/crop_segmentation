@@ -184,6 +184,8 @@ def main(pickle_file, model_path, output_plot, max_seq_len=71, window_size=40):
     indices = [input_order.index(band) for band in target_order]
     input_data = input_data[:, indices, :, :]
 
+    # If the time dimension is less then remove return and clean the code
+
     # Convert to PyTorch tensors
     input_tensor = torch.tensor(input_data, dtype=torch.float32) * 0.0001
     input_tensor = input_tensor[:max_seq_len].permute(0, 2, 3, 1)
@@ -191,9 +193,12 @@ def main(pickle_file, model_path, output_plot, max_seq_len=71, window_size=40):
     input_tensor = input_tensor.unsqueeze(0)
     # Add time channel
     B, T, H, W, C = input_tensor.shape
+    if T < max_seq_len:
+        return
 
     time_points = torch.linspace(0, 364, steps=max_seq_len)
     time_channel = time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2)
+    print(time_channel.shape)
     inputs = torch.cat((input_tensor, time_channel[:, :, :, :, None]), dim=4)
     inputs = inputs.permute(0, 1, 4, 2, 3)
 
@@ -217,11 +222,10 @@ def main(pickle_file, model_path, output_plot, max_seq_len=71, window_size=40):
     plt.imshow(input_data[0, 0:3, :, :].transpose(1, 2, 0))
     plt.show()
 
-    plt.savefig(output_plot.replace(".png", "_rgb.png"))
-
     # Free memory
     del input_tensor, time_channel, inputs, output, probabilities
     gc.collect()
+
 
 def get_all_pkl_files(root_folder):
     """
@@ -235,20 +239,24 @@ def get_all_pkl_files(root_folder):
     """
     root_path = Path(root_folder)
     if not root_path.is_dir():
-        raise ValueError(f"The specified path '{root_folder}' is not a valid directory.")
-    
+        raise ValueError(
+            f"The specified path '{root_folder}' is not a valid directory."
+        )
+
     # Collect all .pkl files from the root folder and subdirectories
-    pkl_files = [str(file) for file in root_path.rglob('*.pkl')]
-    
+    pkl_files = [str(file) for file in root_path.rglob("*.pkl")]
+
     return pkl_files
 
 
 # Run the main function
 if __name__ == "__main__":
-    file = "dev_5943_2019.pkl"
 
-    main(
-        file,
-        "../models/zuericrop11.pth",
-        f"fastfarm_plots/results_{file}.png",
-    )
+    for file in get_all_pkl_files(
+        "../../../datasets/FASTFARM/main_transforms/pickle_crops_yearly/"
+    ):
+        main(
+            file,
+            "../models/zuericrop11.pth",
+            f"fastfarm_plots/results_{file.split('/')[-1]}.png",
+        )
