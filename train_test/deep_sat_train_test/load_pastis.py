@@ -1,4 +1,4 @@
-from models.TSViTcls import TSViTcls
+from models.TSViTdense import TSViT
 import torch
 
 model_config ={
@@ -22,7 +22,7 @@ model_config ={
 }
 
 
-model = TSViTcls(model_config)
+model = TSViT(model_config)
 
 model.load_state_dict(
     torch.load("best.pth", map_location=torch.device("cpu"))
