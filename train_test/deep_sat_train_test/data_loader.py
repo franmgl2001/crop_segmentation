@@ -2,6 +2,26 @@ import torch
 import os
 import pickle
 import pandas as pd
+from torch.utils.data import Dataset
+from transforms import PASTIS_segmentation_transform
+from configs.config_1 import config
+from torch.utils.data import DataLoader
+
+
+def get_dataloader():
+    test_dataset = SatImDataset(
+        csv_file="pickle_paths.csv",
+        root_dir="./",
+        transform=PASTIS_segmentation_transform(config, True),
+    )
+
+    dataloader = DataLoader(
+        dataset=test_dataset,
+        batch_size=config["batch_size"],
+        shuffle=True,
+    )
+
+    return dataloader
 
 
 class SatImDataset(Dataset):

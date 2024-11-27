@@ -5,11 +5,7 @@ import pickle
 import matplotlib.pyplot as plt
 
 
-transforms_config = {
-    "img_res": 24,
-    "labels": 19,
-    "max_seq_len": 60,
-}
+transforms_config = {}
 model_config = {
     "img_res": 24,
     "patch_size": 2,
@@ -28,6 +24,9 @@ model_config = {
     "dropout": 0.0,
     "emb_dropout": 0.0,
     "scale_dim": 4,
+    "img_res": 24,
+    "labels": 19,
+    "max_seq_len": 60,
 }
 
 
