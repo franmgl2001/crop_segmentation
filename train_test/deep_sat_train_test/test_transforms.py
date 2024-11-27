@@ -19,4 +19,5 @@ transformed_sample = transform_pipeline(sample)
 transformed_sample["inputs"] = transformed_sample["inputs"].unsqueeze(0)
 
 
+print(transformed_sample["labels"].shape)
 print(transformed_sample["inputs"].shape)

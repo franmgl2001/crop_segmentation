@@ -44,6 +44,8 @@ transformed_sample = transform_pipeline(sample)
 
 
 transformed_sample["inputs"] = transformed_sample["inputs"].unsqueeze(0)
+print()
+print(transformed_sample["inputs"].shape)
 model.eval()
 with torch.no_grad():
     output = model(transformed_sample["inputs"])
@@ -52,6 +54,19 @@ print(output.shape)
 
 
 # Make an arg max to get the class
-output = torch.argmax(output, dim=2)
 
-print(output.shape)
+# Remove the batch dimension
+output = output.squeeze(0)
+output = torch.argmax(output, dim=0)
+
+
+# Plot input, and output
+
+import matplotlib.pyplot as plt
+
+plt.imshow(transformed_sample["labels"].squeeze(0))
+plt.savefig("figs/input.png")
+
+plt.imshow(output)
+plt.savefig("figs/output.png")
+# Compare to
