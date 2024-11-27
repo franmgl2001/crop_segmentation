@@ -44,7 +44,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
                 time_channel = (
                     time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
                 )
-                print(inputs.shape, time_channel.shape)
+
                 inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
                 inputs = inputs.permute(0, 1, 4, 2, 3)
 
@@ -69,7 +69,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         # Validation Loop
         model.eval()  # Set model to evaluation mode
         running_val_loss = 0.0
-        print(inputs.shape, time_channel.shape)
+
         with torch.no_grad():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
@@ -81,7 +81,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
                 time_channel = (
                     time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
                 )
-                print(inputs.shape, time_channel.shape)
+
                 inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
                 inputs = inputs.permute(0, 1, 4, 2, 3)
 
@@ -290,7 +290,7 @@ model.to(device)
 train_model(model, train_loader, test_loader, criterion, optimizer)
 
 # Evaluate the Model on Test Set
-evaluate_model(model, test_loader, criterion, num_classes, file_name="predictions.csv")
+evaluate_model(model, test_loader, criterion, num_classes)
 
 # Save the Model
 torch.save(model.state_dict(), "tsvit_model.pth")
