@@ -2,6 +2,7 @@ from models.TSViTdense import TSViT
 import torch
 from transforms import PASTIS_segmentation_transform
 import pickle
+import matplotlib.pyplot as plt
 
 
 transforms_config = {
@@ -32,41 +33,34 @@ model_config = {
 
 model = TSViT(model_config)
 
-model.load_state_dict(torch.load("best.pth", map_location=torch.device("cpu")))
+model.load_state_dict(torch.load("weights/best.pth", map_location=torch.device("cpu")))
 
 
 transform_pipeline = PASTIS_segmentation_transform(model_config, True)
 
 # Get pickle file from the dataset
-sample = pickle.load(open("pickles/10110_15.pickle", "rb"))
 
-transformed_sample = transform_pipeline(sample)
+# List the pickles in the dataset folder
 
-
-transformed_sample["inputs"] = transformed_sample["inputs"].unsqueeze(0)
-print()
-print(transformed_sample["inputs"].shape)
-model.eval()
-with torch.no_grad():
-    output = model(transformed_sample["inputs"])
-
-print(output.shape)
+import os
 
 
-# Make an arg max to get the class
+for i in os.listdir("pickles"):
+    sample = pickle.load(open(f"pickles/{i}", "rb"))
+    print(i)
+    print(sample.keys())
+    transformed_sample = transform_pipeline(sample)
+    transformed_sample["inputs"] = transformed_sample["inputs"].unsqueeze(0)
+    print(transformed_sample["inputs"].shape)
+    model.eval()
+    with torch.no_grad():
+        output = model(transformed_sample["inputs"])
+        print(output.shape)
+        output = output.squeeze(0)
+        output = torch.argmax(output, dim=0)
 
-# Remove the batch dimension
-output = output.squeeze(0)
-output = torch.argmax(output, dim=0)
+        plt.imshow(transformed_sample["labels"].squeeze(0))
+        plt.savefig(f"figs/{i}_input.png")
 
-
-# Plot input, and output
-
-import matplotlib.pyplot as plt
-
-plt.imshow(transformed_sample["labels"].squeeze(0))
-plt.savefig("figs/input.png")
-
-plt.imshow(output)
-plt.savefig("figs/output.png")
-# Compare to
+        plt.imshow(output)
+        plt.savefig(f"figs/{i}_output.png")
