@@ -8,6 +8,7 @@ import numpy as np
 import os
 import csv
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 
 
 def export_results_to_csv(results, output_csv_path):
@@ -23,13 +24,13 @@ def export_results_to_csv(results, output_csv_path):
 # Simplified Training Loop
 
 
-
 def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=50):
     model.train()  # Set model to training mode
 
     for epoch in range(num_epochs):
         running_train_loss = 0.0
         print(f"Epoch [{epoch + 1}/{num_epochs}]")
+        writer = SummaryWriter(log_dir="./logs")  # Create a TensorBoard writer
 
         # Training Loop
         with tqdm(total=len(train_loader), desc=f"Training Epoch {epoch + 1}") as pbar:
@@ -95,6 +96,9 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         )
 
         model.train()  # Switch back to training mode after validation
+        # Log losses to TensorBoard
+        writer.add_scalar("Loss/Train", train_loss, epoch + 1)
+        writer.add_scalar("Loss/Validation", val_loss, epoch + 1)
 
     print("Finished Training")
 
@@ -133,7 +137,7 @@ def evaluate_model(
     # To store predictions and labels for MIoU and mean accuracy
     all_preds = []
     all_labels = []
-    
+
     # Open CSV file to log predictions and labels
     with open(csv_filename, mode="w", newline="") as file:
         writer = csv.writer(file)
