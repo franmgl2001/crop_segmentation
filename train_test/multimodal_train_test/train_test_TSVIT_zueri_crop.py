@@ -243,7 +243,7 @@ MAX_SEQ_LEN = 71
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=32)
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=24)
 test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 # Model Configuration
