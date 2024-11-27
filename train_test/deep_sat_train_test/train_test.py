@@ -1,25 +1,96 @@
-import torch.optim.lr_scheduler as lr_scheduler
+import torch
 from loss import MaskedCrossEntropyLoss
 from torch.optim import Adam
 from models.TSViTdense import TSViT
-import data_loader
-from torch.utils.data import DataLoader
+from data_loader import get_dataloader
 from configs.config_1 import config
+import tqdm
+
+train_csv_file = "pickle_paths.csv"
+test_csv_file = "pickle_paths.csv"
+root_dir = "./"
+epochs = 10
+
+
+def evaluate_model(model, eval_loader, criterion, device):
+    """
+    Evaluate the model on the evaluation dataset.
+
+    Args:
+        model: The trained model to evaluate.
+        eval_loader: DataLoader for the evaluation dataset.
+        criterion: Loss function to compute evaluation loss.
+        device: Device to run the evaluation on (CPU or GPU).
+
+    Returns:
+        avg_eval_loss: Average evaluation loss over the dataset.
+    """
+    model.eval()  # Set the model to evaluation mode
+    total_loss = 0.0
+
+    with torch.no_grad():  # Disable gradient calculation for evaluation
+        pbar = tqdm(eval_loader, desc="Evaluating")
+        for batch in pbar:
+            # Retrieve data from the batch
+            data = batch["data"].to(device)  # Input data
+            target = batch["target"].to(device)  # Ground truth labels
+            mask = batch.get("mask", None)  # Optional mask (if used)
+
+            # Forward pass
+            logits = model(data)
+
+            # Compute loss
+            if mask is not None:
+                loss = criterion(logits, (target, mask.to(device)))
+            else:
+                loss = criterion(logits, target)
+
+            # Accumulate loss
+            total_loss += loss.item()
+            pbar.set_postfix({"Loss": loss.item()})
+
+    # Compute average loss
+    avg_eval_loss = total_loss / len(eval_loader)
+    print(f"Average Evaluation Loss: {avg_eval_loss:.4f}")
+    return avg_eval_loss
 
 
 criterion = MaskedCrossEntropyLoss(mean=True)
 model = TSViT(config)
 
-train_dataset = data_loader.get_dataset(split="train", config=config)
-val_dataset = data_loader.get_dataset(split="val", config=config)
-
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
-
-
-optimizer = Adam(model.parameters(), lr=1e-3, weight_decay=0.000)
-
-
-scheduler = lr_scheduler.CosineAnnealingLR(
-    optimizer, T_max=config["steps"][-1], eta_min=config["lr_min"]
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+optimizer = Adam(
+    model.parameters(),
+    lr=config["SOLVER"]["lr_base"],
+    weight_decay=config["SOLVER"]["weight_decay"],
 )
+
+train_loader = get_dataloader(train_csv_file, root_dir, config)
+test_loader = get_dataloader(test_csv_file, root_dir, config)
+
+model.to(device)
+for epoch in range(epochs):
+    model.train()
+    total_loss = 0.0
+
+    for data, target, mask in train_loader:
+        data, target, mask = data.to(device), target.to(device), mask.to(device)
+
+        # Forward pass
+        logits = model(data)
+
+        # Compute loss
+        loss = criterion(logits, (target, mask))
+
+        # Backward pass
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    avg_train_loss = total_loss / len(train_loader)
+    print(f"Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss:.4f}")
+
+    # Evaluate the model
+    evaluate_model(model, test_loader, criterion, device)

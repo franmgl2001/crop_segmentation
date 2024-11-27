@@ -5,7 +5,6 @@ import pickle
 import matplotlib.pyplot as plt
 
 
-transforms_config = {}
 model_config = {
     "img_res": 24,
     "patch_size": 2,
