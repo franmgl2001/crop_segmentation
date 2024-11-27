@@ -43,6 +43,7 @@ sample = pickle.load(open("pickles/10110_15.pickle", "rb"))
 transformed_sample = transform_pipeline(sample)
 
 
+transformed_sample["inputs"] = transformed_sample["inputs"].unsqueeze(0)
 model.eval()
 with torch.no_grad():
     output = model(transformed_sample["inputs"])
