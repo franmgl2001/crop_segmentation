@@ -48,4 +48,10 @@ model.eval()
 with torch.no_grad():
     output = model(transformed_sample["inputs"])
 
-print(output)
+print(output.shape)
+
+
+# Make an arg max to get the class
+output = torch.argmax(output, dim=2)
+
+print(output.shape)

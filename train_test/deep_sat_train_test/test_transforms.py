@@ -15,5 +15,8 @@ sample = pickle.load(open("pickles/10110_15.pickle", "rb"))
 
 transformed_sample = transform_pipeline(sample)
 
+# Add th batch dimension
+transformed_sample["inputs"] = transformed_sample["inputs"].unsqueeze(0)
+
 
 print(transformed_sample["inputs"].shape)
