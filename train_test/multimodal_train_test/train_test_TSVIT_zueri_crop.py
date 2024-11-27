@@ -24,7 +24,7 @@ def export_results_to_csv(results, output_csv_path):
 # Simplified Training Loop
 
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=50):
+def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs=200):
     model.train()  # Set model to training mode
 
     for epoch in range(num_epochs):
@@ -234,10 +234,10 @@ def evaluate_model(
 
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/train_loss.txt", "../../../datasets/zuericrop/dataset"
+    "csvs/train_zuericrop_11.txt", "../../../datasets/zuericrop/dataset"
 )
 test_dataset = CustomDataset(
-    "csvs/test_loss.txt", "../../../datasets/zuericrop/dataset"
+    "csvs/test_zuericrop_11.txt", "../../../datasets/zuericrop/dataset"
 )
 
 num_classes = 10
