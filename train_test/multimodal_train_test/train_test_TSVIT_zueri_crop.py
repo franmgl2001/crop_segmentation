@@ -82,7 +82,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
                     time_points.repeat(B, H, W, 1).permute(0, 3, 1, 2).to(device)
                 )
                 print(inputs.shape, time_channel.shape)
-                inputs = torch.cat((inputs, time_channel[:, :, :, None]), dim=4)
+                inputs = torch.cat((inputs, time_channel[:, :, :, :, None]), dim=4)
                 inputs = inputs.permute(0, 1, 4, 2, 3)
 
                 # Forward pass
