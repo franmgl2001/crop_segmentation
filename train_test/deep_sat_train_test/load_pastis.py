@@ -1,6 +1,6 @@
 from models.TSViTdense import TSViT
 import torch
-from transforms import PASTIS_segmentation_transform
+from transforms.transforms import PASTIS_segmentation_transform
 import pickle
 import matplotlib.pyplot as plt
 

@@ -3,7 +3,7 @@ import os
 import pickle
 import pandas as pd
 from torch.utils.data import Dataset
-from transforms import PASTIS_segmentation_transform
+from transforms.transforms import PASTIS_segmentation_transform
 from torch.utils.data import DataLoader
 
 

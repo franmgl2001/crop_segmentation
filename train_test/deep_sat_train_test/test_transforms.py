@@ -1,4 +1,4 @@
-from transforms import PASTIS_segmentation_transform
+from transforms.transforms import PASTIS_segmentation_transform
 import pickle
 
 model_config = {

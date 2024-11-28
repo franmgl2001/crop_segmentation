@@ -1,8 +1,8 @@
 import torch
-from loss import MaskedCrossEntropyLoss
+from loss.loss import MaskedCrossEntropyLoss
 from torch.optim import Adam
 from models.TSViTdense import TSViT
-from data_loader import get_dataloader
+from data_loader.data_loader import get_dataloader
 from configs.config_1 import config
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter

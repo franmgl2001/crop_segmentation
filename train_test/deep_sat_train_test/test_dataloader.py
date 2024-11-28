@@ -1,6 +1,6 @@
-from data_loader import SatImDataset
+from data_loader.data_loader import SatImDataset
 from torch.utils.data import DataLoader
-from transforms import PASTIS_segmentation_transform
+from transforms.transforms import PASTIS_segmentation_transform
 from configs.config_1 import config
 
 
