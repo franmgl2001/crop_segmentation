@@ -4,7 +4,7 @@ from torch.optim import Adam
 from models.TSViTdense import TSViT
 from data_loader import get_dataloader
 from configs.config_1 import config
-import tqdm
+from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import os
 
@@ -38,19 +38,16 @@ def evaluate_model(model, eval_loader, criterion, device):
         pbar = tqdm(eval_loader, desc="Evaluating")
         for batch in pbar:
             # Retrieve data from the batch
-            data = batch["data"].to(device)  # Input data
-            target = batch["target"].to(device)  # Ground truth labels
-            mask = batch.get("mask", None)  # Optional mask (if used)
+            data = samples["inputs"].to(device)
+            target = samples["labels"].to(device)
+            mask = samples["unk_masks"].to(device)
 
             # Forward pass
             logits = model(data)
             logits = logits.permute(0, 2, 3, 1)
 
             # Compute loss
-            if mask is not None:
-                loss = criterion(logits, (target, mask.to(device)))
-            else:
-                loss = criterion(logits, target)
+            loss = criterion(logits, (target, mask.to(device)))
 
             # Accumulate loss
             total_loss += loss.item()
@@ -105,7 +102,6 @@ for epoch in range(epochs):
     avg_train_loss = total_loss / len(train_loader)
     print(f"Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss:.4f}")
     writer.add_scalar("Average Training Loss", avg_train_loss, epoch)
-    print(f"Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss:.4f}")
 
     # Evaluate the model
     evaluate_model(model, test_loader, criterion, device)
