@@ -30,5 +30,5 @@ config = {
     "num_cycles": 1,
     "reset_lr": True,
     "weight_decay": 0.000,
-    "batch_size": 16,
+    "batch_size": 8,
 }
