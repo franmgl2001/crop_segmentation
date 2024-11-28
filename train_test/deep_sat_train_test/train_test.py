@@ -9,8 +9,8 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 
 
-train_csv_file = "pickle_paths.csv"
-test_csv_file = "pickle_paths.csv"
+train_csv_file = "fold_4_paths.csv"
+test_csv_file = "folds_1_123_paths.csv"
 root_dir = "./"
 epochs = 10
 log_dir = "./tensorboard_logs"
