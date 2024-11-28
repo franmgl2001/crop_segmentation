@@ -35,23 +35,24 @@ def evaluate_model(model, eval_loader, criterion, device):
     total_loss = 0.0
 
     with torch.no_grad():  # Disable gradient calculation for evaluation
-        pbar = tqdm(eval_loader, desc="Evaluating")
-        for batch in pbar:
-            # Retrieve data from the batch
-            data = samples["inputs"].to(device)
-            target = samples["labels"].to(device)
-            mask = samples["unk_masks"].to(device)
+        with tqdm(total=len(eval_loader), desc=f"Evaluating Epoch {epoch + 1}") as pbar:
+            for samples in eval_loader:
+                # Retrieve data from the batch
+                data = samples["inputs"].to(device)
+                target = samples["labels"].to(device)
+                mask = samples["unk_masks"].to(device)
 
-            # Forward pass
-            logits = model(data)
-            logits = logits.permute(0, 2, 3, 1)
+                # Forward pass
+                logits = model(data)
+                logits = logits.permute(0, 2, 3, 1)
 
-            # Compute loss
-            loss = criterion(logits, (target, mask.to(device)))
+                # Compute loss
+                loss = criterion(logits, (target, mask.to(device)))
 
-            # Accumulate loss
-            total_loss += loss.item()
-            pbar.set_postfix({"Loss": loss.item()})
+                # Accumulate loss
+                total_loss += loss.item()
+                pbar.update(1)
+                pbar.set_postfix(train_loss=total_loss)
 
     # Compute average loss
     avg_eval_loss = total_loss / len(eval_loader)
@@ -78,26 +79,27 @@ model.to(device)
 for epoch in range(epochs):
     model.train()
     total_loss = 0.0
-    pbar = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{epochs}", unit="batch")
+    with tqdm(total=len(train_loader), desc=f"Training Epoch {epoch + 1}") as pbar:
+        for samples in train_loader:
 
-    for samples in train_loader:
+            data = samples["inputs"].to(device)
+            target = samples["labels"].to(device)
+            mask = samples["unk_masks"].to(device)
 
-        data = samples["inputs"].to(device)
-        target = samples["labels"].to(device)
-        mask = samples["unk_masks"].to(device)
+            # Forward pass
+            logits = model(data)
+            logits = logits.permute(0, 2, 3, 1)
+            # Compute loss
+            loss = criterion(logits, (target, mask))
 
-        # Forward pass
-        logits = model(data)
-        logits = logits.permute(0, 2, 3, 1)
-        # Compute loss
-        loss = criterion(logits, (target, mask))
+            # Backward pass
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        # Backward pass
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
+            total_loss += loss.item()
+            pbar.update(1)
+            pbar.set_postfix(train_loss=total_loss)
 
     avg_train_loss = total_loss / len(train_loader)
     print(f"Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss:.4f}")
