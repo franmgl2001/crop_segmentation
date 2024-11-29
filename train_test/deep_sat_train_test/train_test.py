@@ -9,13 +9,35 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 
 
-train_csv_file = "fold_4_paths.csv"
-test_csv_file = "folds_1_123_paths.csv"
+train_csv_file = "pickle_paths.csv"
+test_csv_file = "pickle_paths.csv"
 root_dir = "./"
-epochs = 10
+epochs = 100
 log_dir = "./tensorboard_logs"
 os.makedirs(log_dir, exist_ok=True)
+os.makedirs("checkpoints", exist_ok=True)
 writer = SummaryWriter(log_dir=log_dir)
+
+
+def save_checkpoint(epoch, model, optimizer, loss, path):
+    """
+    Save the model and optimizer state.
+
+    Args:
+        epoch (int): Current epoch.
+        model: The model to save.
+        optimizer: The optimizer to save.
+        loss (float): Current evaluation loss.
+        path (str): Path to save the checkpoint.
+    """
+    checkpoint = {
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "loss": loss,
+    }
+    torch.save(checkpoint, path)
+    print(f"Checkpoint saved at {path}")
 
 
 def evaluate_model(model, eval_loader, criterion, device):
@@ -104,6 +126,10 @@ for epoch in range(epochs):
     avg_train_loss = total_loss / len(train_loader)
     print(f"Epoch {epoch + 1}/{epochs}, Average Training Loss: {avg_train_loss:.4f}")
     writer.add_scalar("Average Training Loss", avg_train_loss, epoch)
+    # Save the model checkpoint
+    save_checkpoint(
+        epoch, model, optimizer, avg_train_loss, f"checkpoints/model_{epoch}.pth"
+    )
 
     # Evaluate the model
     evaluate_model(model, test_loader, criterion, device)
