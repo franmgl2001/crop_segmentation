@@ -246,9 +246,14 @@ def evaluate_model(
     model.train()  # Switch back to training mode
 
 
+augmentations = HVFlip(hflip_prob=0.5, vflip_prob=0.5, ground_truths=["labels"])
+
+
 # Create Dataset and Split into Train and Test Sets
 train_dataset = CustomDataset(
-    "csvs/train_zuericrop_11.txt", "../../../datasets/zuericrop/dataset"
+    "csvs/train_zuericrop_11.txt",
+    "../../../datasets/zuericrop/dataset",
+    augmentations=augmentations,
 )
 test_dataset = CustomDataset(
     "csvs/test_zuericrop_11.txt", "../../../datasets/zuericrop/dataset"
