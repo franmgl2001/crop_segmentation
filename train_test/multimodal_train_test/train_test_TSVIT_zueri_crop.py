@@ -102,7 +102,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         writer.add_scalar("Loss/Train", train_loss, epoch + 1)
         writer.add_scalar("Loss/Validation", val_loss, epoch + 1)
         checkpoint_path = os.path.join(
-            checkpoint_dir, f"checkpoint_epoch_{epoch + 1}.pth"
+            checkpoint_dir, f"checkpoint_epoch_drop_0.1_{epoch + 1}.pth"
         )
         torch.save(
             {
@@ -280,8 +280,8 @@ config = {
     "channel_depth": 4,
     "heads": 4,
     "dim_head": 64,
-    "dropout": 0.2,
-    "emb_dropout": 0.2,
+    "dropout": 0.1,
+    "emb_dropout": 0.1,
     "scale_dim": 4,
     "depth": 4,
 }
