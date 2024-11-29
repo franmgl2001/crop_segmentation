@@ -280,8 +280,8 @@ config = {
     "channel_depth": 4,
     "heads": 4,
     "dim_head": 64,
-    "dropout": 0.0,
-    "emb_dropout": 0.0,
+    "dropout": 0.2,
+    "emb_dropout": 0.2,
     "scale_dim": 4,
     "depth": 4,
 }
