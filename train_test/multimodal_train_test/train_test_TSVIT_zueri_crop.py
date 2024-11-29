@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader
 from models.TSViT import TSViT
-from data_loader.numpy_dataloader_zuericop import CustomDataset
+from data_loader.numpy_dataloader_zuericop import CustomDataset, HVFlip
 import numpy as np
 import os
 import csv
@@ -101,6 +101,20 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         # Log losses to TensorBoard
         writer.add_scalar("Loss/Train", train_loss, epoch + 1)
         writer.add_scalar("Loss/Validation", val_loss, epoch + 1)
+        checkpoint_path = os.path.join(
+            checkpoint_dir, f"checkpoint_epoch_{epoch + 1}.pth"
+        )
+        torch.save(
+            {
+                "epoch": epoch + 1,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "train_loss": train_loss,
+                "val_loss": val_loss,
+            },
+            checkpoint_path,
+        )
+        print(f"Checkpoint saved at {checkpoint_path}")
 
     print("Finished Training")
 
@@ -243,6 +257,7 @@ test_dataset = CustomDataset(
 num_classes = 10
 MAX_SEQ_LEN = 71
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+checkpoint_dir = "check_points"
 
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=24)
